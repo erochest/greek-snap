@@ -33,7 +33,10 @@ Executable greek-snap
     snap-loader-static        >= 0.9     && < 0.10,
     text                      >= 0.11    && < 0.12,
     time                      >= 1.1     && < 1.5,
-    xmlhtml                   >= 0.1
+    xmlhtml                   >= 0.1,
+    snaplet-persistent        >= 0.3,
+    persistent,
+    persistent-template
 
   if flag(old-base)
     build-depends:

@@ -10,17 +10,21 @@ module Site
 
 ------------------------------------------------------------------------------
 import           Control.Applicative
-import           Data.ByteString (ByteString)
-import qualified Data.Text as T
+import           Data.ByteString                             (ByteString)
+import qualified Data.Text                                   as T
+import           Database.Persist
+import           Database.Persist.Sql
+import           Heist
+import qualified Heist.Interpreted                           as I
 import           Snap.Core
 import           Snap.Snaplet
 import           Snap.Snaplet.Heist
+import           Snap.Snaplet.Persistent
 import           Snap.Snaplet.Session.Backends.CookieSession
 import           Snap.Util.FileServe
-import           Heist
-import qualified Heist.Interpreted as I
 ------------------------------------------------------------------------------
 import           Application
+import           Model
 
 
 
@@ -37,8 +41,10 @@ app :: SnapletInit App App
 app = makeSnaplet "app" "Chopped up Platonic dialogues." Nothing $ do
     h <- nestSnaplet "" heist $ heistInit "templates"
     s <- nestSnaplet "sess" sess $
-           initCookieSessionManager "site_key.txt" "sess" (Just 3600)
+            initCookieSessionManager "site_key.txt" "sess" (Just 3600)
+    p <- nestSnaplet "" pg $
+            initPersist $ runMigrationUnsafe migrateAll
 
     addRoutes routes
-    return $ App h s
+    return $ App h s p
 
