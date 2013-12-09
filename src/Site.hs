@@ -31,8 +31,29 @@ import           Model
 ------------------------------------------------------------------------------
 -- | The application's routes.
 routes :: [(ByteString, Handler App App ())]
-routes = [ ("",          serveDirectory "static")
+routes = [ ("",                        serveDirectory "static")
+         , ("/documents/",             with pg handleDocumentList)
+         , ("/documents/:documentId/", handleDocument)
          ]
+
+handleDocumentList :: Handler App PersistState ()
+handleDocumentList = do
+    docs <- runPersist $ selectList [] [Asc DocumentTitle]
+    renderWithSplices "document_list" $ documentListSplices docs
+
+documentListSplices :: [Entity Document] -> Splices (SnapletISplice App)
+documentListSplices docs = "documentList" ## (bindDocuments docs)
+
+bindDocuments :: [Entity Document] -> SnapletISplice App
+bindDocuments = I.mapSplices $ I.runChildrenWith . documentSplices
+
+documentSplices :: Monad m => Entity Document -> Splices (I.Splice m)
+documentSplices (Entity dId (Document title _ _)) = do
+    "documentId"    ## I.textSplice (T.pack $ show dId)
+    "documentTitle" ## I.textSplice title
+
+handleDocument :: Handler App App ()
+handleDocument = undefined
 
 
 ------------------------------------------------------------------------------
