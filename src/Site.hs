@@ -10,8 +10,14 @@ module Site
 
 ------------------------------------------------------------------------------
 import           Control.Applicative
+import           Control.Error
+import           Control.Monad
+import Control.Monad.Trans.Class
 import           Data.ByteString                             (ByteString)
+import           Data.Int
 import qualified Data.Text                                   as T
+import qualified Data.Text.Encoding                          as E
+import           Data.Text.Read                              (decimal)
 import           Database.Persist
 import           Database.Persist.Sql
 import           Heist
@@ -33,7 +39,7 @@ import           Model
 routes :: [(ByteString, Handler App App ())]
 routes = [ ("",                        serveDirectory "static")
          , ("/documents/",             with pg handleDocumentList)
-         , ("/documents/:documentId/", handleDocument)
+         , ("/documents/:documentId/", with pg handleDocument)
          ]
 
 handleDocumentList :: Handler App PersistState ()
@@ -48,12 +54,32 @@ bindDocuments :: [Entity Document] -> SnapletISplice App
 bindDocuments = I.mapSplices $ I.runChildrenWith . documentSplices
 
 documentSplices :: Monad m => Entity Document -> Splices (I.Splice m)
-documentSplices (Entity dId (Document title _ _)) = do
-    "documentId"    ## I.textSplice (T.pack $ show dId)
-    "documentTitle" ## I.textSplice title
+documentSplices e@(Entity _ (Document title content _)) = do
+    "documentId"      ## I.textSplice (maybe "" (T.pack . show) $ intKey e)
+    "documentTitle"   ## I.textSplice title
+    "documentContent" ## I.textSplice content
 
-handleDocument :: Handler App App ()
-handleDocument = undefined
+handleDocument :: Handler App PersistState ()
+handleDocument = do
+    doc <- getDocument =<< getParam "documentId"
+    either (const $ modifyResponse (setResponseCode 404) >> render "404")
+           (renderWithSplices "document" . documentSplices)
+           doc
+
+getDocument :: Maybe ByteString
+            -> Handler App PersistState (Either String (Entity Document))
+getDocument Nothing     = return $ Left "Missing ID."
+getDocument (Just bsid) = runEitherT $ do
+    key <-  Key . PersistInt64 . fst
+        <$> hoistEither (decimal $ E.decodeUtf8 bsid)
+    ent <- runPersist (get key) !? "Missing document."
+    return $ Entity key ent
+
+intKey :: Entity a -> Maybe Int64
+intKey (Entity k _) = case unKey k of
+                          PersistInt64 int -> Just int
+                          _                -> Nothing
+
 
 
 ------------------------------------------------------------------------------

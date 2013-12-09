@@ -36,7 +36,9 @@ Executable greek-snap
     xmlhtml                   >= 0.1,
     snaplet-persistent        >= 0.3,
     persistent,
-    persistent-template
+    persistent-template,
+    errors,
+    transformers
 
   if flag(old-base)
     build-depends:
