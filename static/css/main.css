@@ -97,7 +97,8 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
-
+strong { font-weight: bolder; }
+em { font-style: italic; }
 
 
 

@@ -50,6 +50,7 @@ routes = [ ("",                                serveDirectory "static")
          , ("/documents/",                     with pg handleDocumentList)
          , ("/documents/:documentId/",         with pg handleDocument)
          , ("/documents/:documentId/download", with pg handleDownloadDocument)
+         , ("/split/",                         handleSplit)
          ]
 
 handleDocumentList :: Handler App PersistState ()
@@ -73,6 +74,12 @@ handleDownloadDocument = withDocument $ render'
                 addHeader "Content-Disposition" $
                     "attachment; filename=" <> filename
             writeText $ documentContent d
+
+handleSplit :: Handler App App ()
+handleSplit = do
+    docs <- with pg $ runPersist $ selectList [] [Asc DocumentTitle]
+    with fay $ do
+        renderWithSplices "split_form" $ documentListSplices docs
 
 -- | Splices
 
