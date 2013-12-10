@@ -6,17 +6,19 @@
 module Application where
 
 ------------------------------------------------------------------------------
-import Control.Lens
-import Snap.Snaplet
-import Snap.Snaplet.Heist
-import Snap.Snaplet.Persistent
-import Snap.Snaplet.Session
+import           Control.Lens
+import           Snap.Snaplet
+import           Snap.Snaplet.Fay
+import           Snap.Snaplet.Heist
+import           Snap.Snaplet.Persistent
+import           Snap.Snaplet.Session
 
 ------------------------------------------------------------------------------
 data App = App
     { _heist :: Snaplet (Heist App)
     , _sess  :: Snaplet SessionManager
     , _pg    :: Snaplet PersistState
+    , _fay   :: Snaplet Fay
     }
 
 makeLenses ''App

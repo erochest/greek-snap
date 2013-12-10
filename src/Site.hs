@@ -25,6 +25,7 @@ import           Heist
 import qualified Heist.Interpreted                           as I
 import           Snap.Core
 import           Snap.Snaplet
+import           Snap.Snaplet.Fay
 import           Snap.Snaplet.Heist
 import           Snap.Snaplet.Persistent
 import           Snap.Snaplet.Session.Backends.CookieSession
@@ -108,13 +109,13 @@ intKey (Entity k _) = case unKey k of
 ------------------------------------------------------------------------------
 -- | The application initializer.
 app :: SnapletInit App App
-app = makeSnaplet "app" "Chopped up Platonic dialogues." Nothing $ do
-    h <- nestSnaplet "" heist $ heistInit "templates"
-    s <- nestSnaplet "sess" sess $
-            initCookieSessionManager "site_key.txt" "sess" (Just 3600)
-    p <- nestSnaplet "" pg $
-            initPersist $ runMigrationUnsafe migrateAll
+app = makeSnaplet "app" "Chopped up Platonic dialogues." Nothing $
+    App <$> nestSnaplet "" heist (heistInit "templates")
+        <*> nestSnaplet "sess" sess
+                (initCookieSessionManager "site_key.txt" "sess" (Just 3600))
+        <*> nestSnaplet "" pg
+                (initPersist $ runMigrationUnsafe migrateAll)
+        <*> nestSnaplet "fay" fay initFay
 
-    addRoutes routes
-    return $ App h s p
+    <*  addRoutes routes
 

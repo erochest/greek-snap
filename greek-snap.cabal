@@ -38,7 +38,11 @@ Executable greek-snap
     persistent,
     persistent-template,
     errors,
-    transformers
+    transformers,
+    snaplet-fay,
+    fay,
+    fay-text,
+    fay-jquery
 
   if flag(old-base)
     build-depends:
