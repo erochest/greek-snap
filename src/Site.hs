@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 ------------------------------------------------------------------------------
@@ -12,7 +13,10 @@ module Site
 import           Control.Applicative
 import           Control.Error
 import           Control.Monad
+import           Control.Monad.IO.Class
+import           Control.Monad.Logger
 import           Control.Monad.Trans.Class
+import           Control.Monad.Trans.Resource
 import           Data.ByteString                             (ByteString)
 import           Data.Int
 import           Data.Monoid
@@ -20,6 +24,7 @@ import qualified Data.Text                                   as T
 import qualified Data.Text.Encoding                          as E
 import           Data.Text.Read                              (decimal)
 import           Database.Persist
+import           Database.Persist.Postgresql
 import           Database.Persist.Sql
 import           Heist
 import qualified Heist.Interpreted                           as I
@@ -30,6 +35,8 @@ import           Snap.Snaplet.Heist
 import           Snap.Snaplet.Persistent
 import           Snap.Snaplet.Session.Backends.CookieSession
 import           Snap.Util.FileServe
+import           System.Environment
+import           Web.Heroku
 ------------------------------------------------------------------------------
 import           Application
 import           Model
@@ -114,8 +121,29 @@ app = makeSnaplet "app" "Chopped up Platonic dialogues." Nothing $
         <*> nestSnaplet "sess" sess
                 (initCookieSessionManager "site_key.txt" "sess" (Just 3600))
         <*> nestSnaplet "" pg
-                (initPersist $ runMigrationUnsafe migrateAll)
+                (initPersistEnv $ runMigrationUnsafe migrateAll)
         <*> nestSnaplet "fay" fay initFay
 
     <*  addRoutes routes
+
+-- | This is taken from Snap.Snaplet.Persist, but I've changed it to read
+-- configuration from the environment.
+initPersistEnv :: SqlPersistT (NoLoggingT IO) a -> SnapletInit b PersistState
+initPersistEnv migration = makeSnaplet "persist" description datadir $ do
+    p <- mkEnvPool
+    liftIO . runNoLoggingT $ runSqlPool migration p
+    return $ PersistState p
+    where description = "Snaplet for persistent DB library"
+          datadir     = Nothing
+
+mkEnvPool :: (Functor (m b v), MonadIO (m b v), MonadSnaplet m)
+          => m b v ConnectionPool
+mkEnvPool = do
+    poolSize <-  either (const 3) id
+             .   maybe (Right 3) (fmap fst . decimal . T.pack)
+             <$> liftIO (lookupEnv "DATABASE_POOL_SIZE")
+    dbParams <-  connect <$> liftIO dbConnParams
+    createPostgresqlPool dbParams poolSize
+    where connect = E.encodeUtf8 . T.intercalate " " . map eqPair
+          eqPair (k, v) = k <> "=" <> v
 
