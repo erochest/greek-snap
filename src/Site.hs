@@ -49,6 +49,25 @@ handleDocumentList = do
     docs <- runPersist $ selectList [] [Asc DocumentTitle]
     renderWithSplices "document_list" $ documentListSplices docs
 
+handleDocument :: Handler App PersistState ()
+handleDocument = withDocument $ renderWithSplices "document" . documentSplices
+
+handleDownloadDocument :: Handler App PersistState ()
+handleDownloadDocument = withDocument $ render'
+    where
+        render' (Entity _ d) = do
+            let filename = maybe filename E.encodeUtf8
+                         . rightMay
+                         . lastErr "error"
+                         . T.splitOn "/"
+                         $ documentSourceFile d
+            modifyResponse $
+                addHeader "Content-Disposition" $
+                    "attachment; filename=" <> filename
+            writeText $ documentContent d
+
+-- | Splices
+
 documentListSplices :: [Entity Document] -> Splices (SnapletISplice App)
 documentListSplices docs = "documentList" ## (bindDocuments docs)
 
@@ -61,44 +80,30 @@ documentSplices e@(Entity _ (Document title content _)) = do
     "documentTitle"   ## I.textSplice title
     "documentContent" ## I.textSplice content
 
-handleDocument :: Handler App PersistState ()
-handleDocument = do
-    doc <- getDocument =<< getParam "documentId"
-    either (const $ modifyResponse (setResponseCode 404) >> render "404")
-           (renderWithSplices "document" . documentSplices)
-           doc
+-- | Utilities
+
+withDocument :: (Entity Document -> Handler App PersistState ())
+             -> Handler App PersistState ()
+withDocument handler =
+        getParam "documentId"
+    >>= getDocument
+    >>= either err handler
+    where err =  const $ modifyResponse (setResponseCode 404)
+              >> render "404"
 
 getDocument :: Maybe ByteString
             -> Handler App PersistState (Either String (Entity Document))
-getDocument Nothing     = return $ Left "Missing ID."
-getDocument (Just bsid) = runEitherT $ do
-    key <-  Key . PersistInt64 . fst
-        <$> hoistEither (decimal $ E.decodeUtf8 bsid)
-    ent <- runPersist (get key) !? "Missing document."
+getDocument doc = runEitherT $ do
+    bsid <-  doc ?? "Missing ID."
+    key  <-  Key . PersistInt64 . fst
+         <$> hoistEither (decimal $ E.decodeUtf8 bsid)
+    ent  <-  runPersist (get key) !? "Missing document."
     return $ Entity key ent
 
 intKey :: Entity a -> Maybe Int64
 intKey (Entity k _) = case unKey k of
                           PersistInt64 int -> Just int
                           _                -> Nothing
-
-handleDownloadDocument :: Handler App PersistState ()
-handleDownloadDocument = do
-    doc <- getDocument =<< getParam "documentId"
-    either (const $ modifyResponse (setResponseCode 404) >> render "404")
-           render'
-           doc
-    where
-        render' (Entity _ d) = do
-            let filename = maybe filename E.encodeUtf8
-                         . rightMay
-                         . lastErr "error"
-                         . T.splitOn "/"
-                         $ documentSourceFile d
-            modifyResponse $
-                addHeader "Content-Disposition" $
-                    "attachment; filename=" <> filename
-            writeText $ documentContent d
 
 ------------------------------------------------------------------------------
 -- | The application initializer.
