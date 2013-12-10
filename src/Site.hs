@@ -12,9 +12,10 @@ module Site
 import           Control.Applicative
 import           Control.Error
 import           Control.Monad
-import Control.Monad.Trans.Class
+import           Control.Monad.Trans.Class
 import           Data.ByteString                             (ByteString)
 import           Data.Int
+import           Data.Monoid
 import qualified Data.Text                                   as T
 import qualified Data.Text.Encoding                          as E
 import           Data.Text.Read                              (decimal)
@@ -37,9 +38,10 @@ import           Model
 ------------------------------------------------------------------------------
 -- | The application's routes.
 routes :: [(ByteString, Handler App App ())]
-routes = [ ("",                        serveDirectory "static")
-         , ("/documents/",             with pg handleDocumentList)
-         , ("/documents/:documentId/", with pg handleDocument)
+routes = [ ("",                                serveDirectory "static")
+         , ("/documents/",                     with pg handleDocumentList)
+         , ("/documents/:documentId/",         with pg handleDocument)
+         , ("/documents/:documentId/download", with pg handleDownloadDocument)
          ]
 
 handleDocumentList :: Handler App PersistState ()
@@ -80,7 +82,23 @@ intKey (Entity k _) = case unKey k of
                           PersistInt64 int -> Just int
                           _                -> Nothing
 
-
+handleDownloadDocument :: Handler App PersistState ()
+handleDownloadDocument = do
+    doc <- getDocument =<< getParam "documentId"
+    either (const $ modifyResponse (setResponseCode 404) >> render "404")
+           render'
+           doc
+    where
+        render' (Entity _ d) = do
+            let filename = maybe filename E.encodeUtf8
+                         . rightMay
+                         . lastErr "error"
+                         . T.splitOn "/"
+                         $ documentSourceFile d
+            modifyResponse $
+                addHeader "Content-Disposition" $
+                    "attachment; filename=" <> filename
+            writeText $ documentContent d
 
 ------------------------------------------------------------------------------
 -- | The application initializer.
