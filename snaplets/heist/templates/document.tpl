@@ -8,7 +8,9 @@
   </div>
 
   <pre>
-    <documentContent/>
+    <code class="language-markup">
+      <documentContent/>
+    </code>
   </pre>
 </apply>
 
