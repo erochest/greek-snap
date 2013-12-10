@@ -26,8 +26,10 @@
           <apply template="_navbar" />
         </header>
 
-        <div id="content">
-          <apply-content/>
+        <div id="content" class="container">
+          <div class="col-xs-12">
+            <apply-content/>
+          </div>
         </div>
 
         <footer>
