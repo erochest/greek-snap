@@ -51,6 +51,7 @@ routes = [ ("",                                serveDirectory "static")
          , ("/documents/:documentId/",         with pg handleDocument)
          , ("/documents/:documentId/download", with pg handleDownloadDocument)
          , ("/split/",                         handleSplit)
+         , ("/fay/split.js",                   with fay fayServe)
          ]
 
 handleDocumentList :: Handler App PersistState ()

@@ -43,5 +43,6 @@
         <script src="/js/vendor/prism.js"></script>
         <script src="/js/plugins.js"></script>
         <script src="/js/main.js"></script>
+        <extra-scripts/>
     </body>
 </html>

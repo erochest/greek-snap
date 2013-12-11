@@ -45,6 +45,7 @@ Executable greek-snap
     transformers,
     snaplet-fay,
     fay,
+    fay-dom,
     fay-text,
     fay-jquery
 
