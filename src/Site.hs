@@ -37,9 +37,11 @@ import           Snap.Snaplet.Session.Backends.CookieSession
 import           Snap.Util.FileServe
 import           System.Environment
 import           Web.Heroku
+import           XML.Split
 ------------------------------------------------------------------------------
 import           Application
-import           Model
+import           Model                                       hiding (Document)
+import qualified Model                                       as M
 
 
 
@@ -51,6 +53,7 @@ routes = [ ("",                                serveDirectory "static")
          , ("/documents/:documentId/",         with pg handleDocument)
          , ("/documents/:documentId/download", with pg handleDownloadDocument)
          , ("/split/",                         handleSplit)
+         , ("/split/download",                 with pg handleSplitDownload)
          , ("/fay/split.js",                   with fay fayServe)
          ]
 
@@ -82,23 +85,26 @@ handleSplit = do
     with fay $ do
         renderWithSplices "split_form" $ documentListSplices docs
 
+handleSplitDownload :: Handler App PersistState ()
+handleSplitDownload = undefined
+
 -- | Splices
 
-documentListSplices :: [Entity Document] -> Splices (SnapletISplice App)
+documentListSplices :: [Entity M.Document] -> Splices (SnapletISplice App)
 documentListSplices docs = "documentList" ## (bindDocuments docs)
 
-bindDocuments :: [Entity Document] -> SnapletISplice App
+bindDocuments :: [Entity M.Document] -> SnapletISplice App
 bindDocuments = I.mapSplices $ I.runChildrenWith . documentSplices
 
-documentSplices :: Monad m => Entity Document -> Splices (I.Splice m)
-documentSplices e@(Entity _ (Document title content _)) = do
+documentSplices :: Monad m => Entity M.Document -> Splices (I.Splice m)
+documentSplices e@(Entity _ (M.Document title content _)) = do
     "documentId"      ## I.textSplice (maybe "" (T.pack . show) $ intKey e)
     "documentTitle"   ## I.textSplice title
     "documentContent" ## I.textSplice content
 
 -- | Utilities
 
-withDocument :: (Entity Document -> Handler App PersistState ())
+withDocument :: (Entity M.Document -> Handler App PersistState ())
              -> Handler App PersistState ()
 withDocument handler =
         getParam "documentId"
@@ -108,7 +114,7 @@ withDocument handler =
               >> render "404"
 
 getDocument :: Maybe ByteString
-            -> Handler App PersistState (Either String (Entity Document))
+            -> Handler App PersistState (Either String (Entity M.Document))
 getDocument doc = runEitherT $ do
     bsid <-  doc ?? "Missing ID."
     key  <-  Key . PersistInt64 . fst
