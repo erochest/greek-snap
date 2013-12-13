@@ -1,1 +1,1 @@
-web: cabal run -- -p $PORT
+web: ./greek-snap -p $PORT
