@@ -10,7 +10,7 @@
   </div>
 
   <form method="GET" action="/split/download">
-    <fieldset id="split1">
+    <fieldset id="split1" style="display: none;">
       <select multiple class="form-control" id="document" name="document"
               required size="20">
         <documentList>
@@ -27,7 +27,7 @@
       </div>
     </fieldset>
 
-    <fieldset id="split2">
+    <fieldset id="split2" style="display: none;">
       <ul class="list-group form-group">
         <li class="list-group-item">
           <label>
@@ -63,7 +63,7 @@
       </div>
     </fieldset>
 
-    <fieldset id="split3">
+    <fieldset id="split3" style="display: none;">
       <div class="form-group">
         <label>
           <input type="text" name="chunksize" id="chunksize" value="500">
@@ -78,7 +78,7 @@
       </div>
       <div class="pull-right">
         <button id="splitdone" class="btn btn-success next" type="submit">
-          Done <span class="glyphicon glyphicon-ok"></span>
+          Done <span class="glyphicon glyphicon-cloud-download"></span>
         </button>
       </div>
     </fieldset>
