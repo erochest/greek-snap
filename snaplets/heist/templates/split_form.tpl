@@ -62,12 +62,12 @@
     <fieldset id="split3">
       <div class="form-group">
         <label>
-          <input type="text" name="chunksize" id="chunksize" value="250">
+          <input type="text" name="chunksize" id="chunksize" value="500">
           <em>Chunk Size</em> is the number of tokens to include in each
           window of text.
         </label>
         <label>
-          <input type="text" name="chunkoffset" id="chunkoffset" value="50">
+          <input type="text" name="chunkoffset" id="chunkoffset" value="250">
           <em>Chunk Offset</em> is how far to slide the window over each
           step through the document.
         </label>

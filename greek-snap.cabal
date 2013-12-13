@@ -46,6 +46,8 @@ Executable greek-snap
     conduit,
     system-filepath,
     dlist,
+    unordered-containers,
+    zip-archive,
     xml-types,
     xml-conduit,
     xml-lens,
