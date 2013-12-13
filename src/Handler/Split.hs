@@ -59,12 +59,17 @@ handleSplitDownload = do
                                            <*> division
                                            <*> chunkSize
                                            <*> chunkOffset
-    maybe error500 renderSplits splits
+    let base = maybe "divided" (T.append "by-" . T.toLower . T.pack . show)
+                     division
+    maybe error500 (renderSplits base) splits
     where paramInts = mapM (fmap fst . C8.readInt) . C8.words
           toint v   = fmap fst . C8.readInt =<< v
-          renderSplits ss = do
-              modifyResponse (setHeader "content-type" "application/zip")
-              writeLBS . fromArchive =<< liftIO (splitsToArchive ss)
+          renderSplits base ss = do
+              modifyResponse $ do
+                setHeader "content-type" "application/zip"
+                setHeader "content-disposition" $
+                    "attachment; filename=" <> E.encodeUtf8 base <> ".zip"
+              writeLBS . fromArchive =<< liftIO (splitsToArchive base ss)
           error500 = do
               modifyResponse (setResponseStatus 500 "Internal Server Error")
               writeBS "500 error"
@@ -77,20 +82,21 @@ splitParams docIds dv size offset = do
                       documentContent
     where tokey = Key . PersistInt64 . fromIntegral
 
-splitsToArchive :: [Split] -> IO Archive
-splitsToArchive ss = do
+splitsToArchive :: T.Text -> [Split] -> IO Archive
+splitsToArchive dir ss = do
     now <- truncate <$> getPOSIXTime
     return . foldl' (flip addEntryToArchive) emptyArchive
            $ map (splitEntry now) ss
     where splitEntry now s@Split{..} = toEntry (spath s) now
                                     . fromStrict
                                     $ E.encodeUtf8 _splitText
+          dir' = FS.fromText dir
           spath Split{..} = FS.encodeString
-                          $ ( FS.fromText
-                            $ T.intercalate "-"
-                            [ toText' _splitPath
-                            , _splitId
-                            , T.pack (show _splitN)
-                            ]) FS.<.> "txt"
+                          $ dir' FS.</> ( FS.fromText
+                                        $ T.intercalate "-"
+                                        [ toText' _splitPath
+                                        , _splitId
+                                        , T.pack (show _splitN)
+                                        ]) FS.<.> "txt"
           toText' = either id id . FS.toText
 
