@@ -23,7 +23,6 @@ module XML.Split
 
 import           Control.Applicative
 import           Control.Lens
-import           Control.Monad.Identity
 import           Data.Conduit
 import qualified Data.Conduit.List         as CL
 import qualified Data.DList                as D
