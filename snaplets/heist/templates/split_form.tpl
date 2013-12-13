@@ -11,13 +11,17 @@
 
   <form method="GET" action="/split/download">
     <fieldset id="split1">
-      <select multiple class="form-control" name="document" required size="20">
+      <select multiple class="form-control" id="document" name="document"
+              required size="20">
         <documentList>
           <option value="${documentId}"><documentTitle/></option>
         </documentList>
       </select>
       <div class="pull-right">
-        <button id="splitnext1" class="btn btn-primary">
+        <button id="selectall" class="btn">
+          Select All <span class="glyphicon glyphicon-list"></span>
+        </button>
+        <button id="splitnext1" class="btn btn-primary next">
           Next <span class="glyphicon glyphicon-chevron-right"></span>
         </button>
       </div>
@@ -53,7 +57,7 @@
         </li>
       </ul>
       <div class="pull-right">
-        <button id="splitnext2" class="btn btn-primary">
+        <button id="splitnext2" class="btn btn-primary next">
           Next <span class="glyphicon glyphicon-chevron-right"></span>
         </button>
       </div>
@@ -73,7 +77,7 @@
         </label>
       </div>
       <div class="pull-right">
-        <button id="splitdone" class="btn btn-success" type="submit">
+        <button id="splitdone" class="btn btn-success next" type="submit">
           Done <span class="glyphicon glyphicon-ok"></span>
         </button>
       </div>

@@ -5371,7 +5371,7 @@ Split.doPage = function($p1){
             if ($tmp2 instanceof Fay$$Cons) {
               var next = $tmp2.car;
               var rest$39$ = $tmp2.cdr;
-              return Fay$$_(Fay$$_(Fay$$then)(Fay$$_(Fay$$_(Fay$$bind)(Fay$$_(Fay$$_(JQuery.selectInContext)("button"))(current$39$)))(Fay$$_(JQuery.onClick)(function($p1){
+              return Fay$$_(Fay$$_(Fay$$then)(Fay$$_(Fay$$_(Fay$$bind)(Fay$$_(Fay$$_(JQuery.selectInContext)("button.next"))(current$39$)))(Fay$$_(JQuery.onClick)(function($p1){
                 var ev = $p1;
                 return Fay$$_(Fay$$_(Fay$$then)(Fay$$_(JQuery.preventDefault)(ev)))(Fay$$_(Fay$$_(Fay$$then)(Fay$$_(Fay$$_(JQuery.hide)(JQuery.Slow))(current$39$)))(Fay$$_(Fay$$_(Fay$$then)(Fay$$_(Fay$$_(Prelude.$36$)(Fay$$_(DOM.setTimeout)(1)))(Fay$$_(Fay$$_(Prelude.$36$)(Prelude.$_const))(Fay$$_(Fay$$_(Split.doPage)(next))(rest$39$)))))(Fay$$_(Fay$$$_return)(false))));
               }))))(Fay$$_(Fay$$$_return)(Fay$$unit));
@@ -5404,6 +5404,33 @@ Split.setProgress = function($p1){
     };
   };
 };
+Split.setSelected = function($p1){
+  return function($p2){
+    return new Fay$$$(function(){
+      return new Fay$$Monad(Fay$$jsToFay(["unknown"],Fay$$fayToJs(["unknown"],$p2)['selected'] = Fay$$fayToJs_bool($p1)));
+    });
+  };
+};
+Split.tee = function($p1){
+  return function($p2){
+    return new Fay$$$(function(){
+      var a = $p2;
+      var msg = $p1;
+      return Fay$$_(Fay$$_(Fay$$then)(Fay$$_(Fay$$_(Prelude.$36$)(Prelude.putStrLn))(Fay$$_(Fay.Text.Type.unpack)(msg))))(Fay$$_(Fay$$_(Fay$$then)(Fay$$_(Prelude.print)(a)))(Fay$$_(Fay$$$_return)(a)));
+    });
+  };
+};
+Split.addSelectAll = new Fay$$$(function(){
+  return Fay$$_(Fay$$_(Fay$$then)(Fay$$_(Fay$$_(Fay$$bind)(Fay$$_(JQuery.select)("#selectall")))(Fay$$_(JQuery.onClick)(function($p1){
+    var ev = $p1;
+    return Fay$$_(Fay$$_(Fay$$then)(Fay$$_(Fay$$_(Fay$$bind)(Fay$$_(Fay$$_(Fay$$then)(Fay$$_(JQuery.preventDefault)(ev)))(Fay$$_(JQuery.select)("#document option"))))(Fay$$_(JQuery.each)(function($p1){
+      return function($p2){
+        var el = $p2;
+        return Fay$$_(Fay$$_(Fay$$then)(Fay$$_(Fay$$_(Split.setSelected)(true))(el)))(Fay$$_(Fay$$$_return)(true));
+      };
+    }))))(Fay$$_(Fay$$$_return)(false));
+  }))))(Fay$$_(Fay$$$_return)(Fay$$unit));
+});
 Split.showt = new Fay$$$(function(){
   return Fay$$_(Fay$$_(Prelude.$46$)(Fay.Text.Type.pack))(Prelude.show);
 });
@@ -5412,7 +5439,7 @@ Split.main = new Fay$$$(function(){
     var fieldSets = new Fay$$$(function(){
       return Fay$$list([Fay$$list(["documents","#split1"]),Fay$$list(["divisions","#split2"]),Fay$$list(["chunks","#split3"])]);
     });
-    return Fay$$_(Fay$$_(Prelude.$36$)(JQuery.ready))(Fay$$_(Fay$$_(Fay$$then)(Fay$$_(Fay$$_(Prelude.$36$)(Fay$$_(Prelude.forM_)(fieldSets)))(function($p1){
+    return Fay$$_(Fay$$_(Prelude.$36$)(JQuery.ready))(Fay$$_(Fay$$_(Fay$$then)(Split.addSelectAll))(Fay$$_(Fay$$_(Fay$$then)(Fay$$_(Fay$$_(Prelude.$36$)(Fay$$_(Prelude.forM_)(fieldSets)))(function($p1){
       if (Fay$$listLen(Fay$$_($p1),2)) {
         var elid = Fay$$index(1,Fay$$_($p1));
         return Fay$$_(Fay$$_(Fay$$bind)(Fay$$_(JQuery.select)(elid)))(Fay$$_(JQuery.hide)(JQuery.Instantly));
@@ -5426,7 +5453,7 @@ Split.main = new Fay$$$(function(){
         return Fay$$_(Fay$$_(Split.doPage)(first))(rest);
       }
       return Fay$$_(Prelude.fail)(Fay$$_(Fay.Text.Type.unpack)("ERMAHGERD"));
-    })(fieldSets)));
+    })(fieldSets))));
   });
 });
 

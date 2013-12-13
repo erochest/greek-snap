@@ -30,7 +30,7 @@ doPage current@(subtitle, elid) rest = do
     jshow Slow current'
     case rest of
         (next:rest') ->
-            selectInContext "button" current' >>= onClick (\ev -> do
+            selectInContext "button.next" current' >>= onClick (\ev -> do
                 JQuery.preventDefault ev
                 hide Slow current'
                 setTimeout 1 $ const $ doPage next rest'
@@ -45,11 +45,31 @@ setProgress valueNow valueMax progressBar = do
     return ()
     where width = truncate $ 100 * fromIntegral valueNow / fromIntegral valueMax
 
+setSelected :: Bool -> JQuery.Element -> Fay ()
+setSelected = ffi "%2['selected'] = %1"
+
+-- tee :: Automatic a => Text -> a -> Fay a
+tee msg a = do
+    putStrLn $ T.unpack msg
+    print a
+    return a
+
+addSelectAll :: Fay ()
+addSelectAll =
+        select "#selectall"
+    >>= onClick (\ev ->
+                    JQuery.preventDefault ev
+                >>  select "#document option"
+                >>= each (\_ el -> setSelected True el >> return True)
+                >>  return False)
+    >>  return ()
+
 showt :: Show a => a -> Text
 showt = pack . show
 
 main :: Fay ()
 main = ready $ do
+    addSelectAll
     forM_ fieldSets $ \(_, elid) -> select elid >>= hide Instantly
     case fieldSets of
         (first:rest) -> doPage first rest
