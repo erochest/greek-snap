@@ -12,18 +12,25 @@ import           Codec.Archive.Zip
 import           Control.Applicative
 import           Control.Monad
 import           Control.Monad.IO.Class
-import           Data.ByteString           (ByteString)
-import qualified Data.ByteString.Char8     as C8
-import           Data.ByteString.Lazy      (fromStrict)
-import qualified Data.Char                 as C
-import           Data.List                 (foldl')
+import           Data.ByteString            (ByteString)
+import qualified Data.ByteString.Char8      as C8
+import           Data.ByteString.Lazy       (fromStrict)
+import qualified Data.Char                  as C
+import           Data.List                  (foldl')
+import           Data.Maybe
 import           Data.Monoid
-import qualified Data.Text                 as T
-import qualified Data.Text.Encoding        as E
+import qualified Data.Text                  as T
+import qualified Data.Text.Encoding         as E
+import qualified Data.Text.Lazy             as TL
+import           Data.Text.Lazy.Builder
+import qualified Data.Text.Lazy.Builder     as B
+import           Data.Text.Lazy.Builder.Int
 import           Data.Time.Clock.POSIX
-import           Data.Traversable          (sequenceA)
+import           Data.Traversable           (sequenceA)
 import           Database.Persist
-import qualified Filesystem.Path.CurrentOS as FS
+import qualified Filesystem.Path.CurrentOS  as FS
+import           Heist
+import qualified Heist.Interpreted          as I
 import           Model
 import           Snap.Core
 import           Snap.Snaplet
@@ -31,8 +38,9 @@ import           Snap.Snaplet.Fay
 import           Snap.Snaplet.Heist
 import           Snap.Snaplet.Persistent
 import           Splices
+import           Utils
 import           XML.Split
-import qualified XML.Split                 as S
+import qualified XML.Split                  as S
 
 
 -- data Hole = Hole
@@ -40,6 +48,7 @@ import qualified XML.Split                 as S
 
 routes :: [(ByteString, Handler App App ())]
 routes = [ ("/split/",                         handleSplit)
+         , ("/split/done",                     with pg handleSplitDone)
          , ("/split/download",                 with pg handleSplitDownload)
          , ("/fay/split.js",                   with fay fayServe)
          ]
@@ -50,38 +59,64 @@ handleSplit = do
     with fay $ do
         renderWithSplices "split_form" $ documentListSplices docs
 
+handleSplitDone :: Handler App PersistState ()
+handleSplitDone = getSplitParams >>= maybe error500 done
+    where done = renderWithSplices "split_done" . spSplices . mkDlUrl
+          spSplices url = do
+              "downloadURL"    ## I.textSplice url
+              "downloadScript" ## tagSplice "script" [("language", "javascript")]
+                    ("setTimeout(function() { window.location = '" <> url <> "'; }, 3000);\n")
+          mkDlUrl SP{..} =
+                 TL.toStrict
+              .  toLazyText
+              $  mconcat [ "/split/download"
+                         , "?division=",    B.fromString . map C.toLower $ show division
+                         , "&chunksize=",   decimal chunkSize
+                         , "&chunkoffset=", decimal chunkOffset
+                         ]
+              <> (mconcat . map (mappend "&document=" . decimal)
+                          $ mapMaybe (intKey . flip Entity undefined) docIds)
+
 handleSplitDownload :: Handler App PersistState ()
 handleSplitDownload = do
-    docIds      <- join . fmap paramInts <$> getParam "document"
-    division    <- join . fmap (S.fromText . E.decodeUtf8) <$> getParam "division"
-    chunkSize   <- toint <$> getParam "chunksize"
-    chunkOffset <- toint <$> getParam "chunkoffset"
-    splits      <- sequenceA $ splitParams <$> docIds
-                                           <*> division
-                                           <*> chunkSize
-                                           <*> chunkOffset
-    let base = maybe "divided" (T.append "by-" . T.toLower . T.pack . show)
-                     division
+    sp     <- getSplitParams
+    splits <- sequenceA $ splitParams <$> sp
+    let base = maybe "divided" (T.append "by-" . T.toLower . T.pack . show . division) sp
     maybe error500 (renderSplits base) splits
-    where paramInts = mapM (fmap fst . C8.readInt) . C8.words
-          toint v   = fmap fst . C8.readInt =<< v
+    where toint v   = fmap fst . C8.readInt =<< v
           renderSplits base ss = do
               modifyResponse $ do
                 setHeader "content-type" "application/zip"
                 setHeader "content-disposition" $
                     "attachment; filename=" <> E.encodeUtf8 base <> ".zip"
               writeLBS . fromArchive =<< liftIO (splitsToArchive base ss)
-          error500 = do
-              modifyResponse (setResponseStatus 500 "Internal Server Error")
-              writeBS "500 error"
 
-splitParams :: [Int] -> Division -> Int -> Int -> Handler App PersistState [Split]
-splitParams docIds dv size offset = do
-    docs <- runPersist $ selectList [DocumentId <-. map tokey docIds] []
+data SplitParams = SP
+                 { docIds      :: [Key Model.Document]
+                 , division    :: Division
+                 , chunkSize   :: Int
+                 , chunkOffset :: Int
+                 } deriving (Show)
+
+getSplitParams :: MonadSnap m => m (Maybe SplitParams)
+getSplitParams = do
+    docIds      <- join . fmap paramInts <$> getParam "document"
+    division    <- join . fmap (S.fromText . E.decodeUtf8) <$> getParam "division"
+    chunkSize   <- toint <$> getParam "chunksize"
+    chunkOffset <- toint <$> getParam "chunkoffset"
+    return $ SP <$> docIds <*> division <*> chunkSize <*> chunkOffset
+    where tokey     = Key . PersistInt64 . fromIntegral
+          paramInts = mapM (fmap (tokey . fst) . C8.readInt) . C8.words
+          toint v   = fmap fst . C8.readInt =<< v
+
+splitParams :: SplitParams -> Handler App PersistState [Split]
+splitParams SP{..} = do
+    docs <- runPersist $ selectList [DocumentId <-. docIds] []
     liftIO . fmap concat . forM docs $ \(Entity _ Model.Document{..}) ->
-        splitDocument dv (size, offset) (FS.fromText documentSourceFile)
+        splitDocument division
+                      (chunkSize, chunkOffset)
+                      (FS.fromText documentSourceFile)
                       documentContent
-    where tokey = Key . PersistInt64 . fromIntegral
 
 splitsToArchive :: T.Text -> [Split] -> IO Archive
 splitsToArchive dir ss = do

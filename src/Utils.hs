@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wall #-}
 
 
 module Utils where
@@ -24,9 +25,9 @@ withDocument :: (Entity Document -> Handler App PersistState ())
 withDocument handler =
         getParam "documentId"
     >>= getDocument
-    >>= either err handler
-    where err =  const $ modifyResponse (setResponseCode 404)
-              >> render "404"
+    >>= either er handler
+    where er =  const $ modifyResponse (setResponseCode 404)
+             >> render "404"
 
 getDocument :: Maybe ByteString
             -> Handler App PersistState (Either String (Entity Document))
@@ -41,4 +42,9 @@ intKey :: Entity a -> Maybe Int64
 intKey (Entity k _) = case unKey k of
                           PersistInt64 int -> Just int
                           _                -> Nothing
+
+error500 :: MonadSnap m => m ()
+error500 = do
+    modifyResponse $ setResponseStatus 500 "Internal Server Error"
+    writeBS "500 error"
 

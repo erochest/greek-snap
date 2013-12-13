@@ -9,7 +9,7 @@
     </div>
   </div>
 
-  <form method="GET" action="/split/download">
+  <form method="POST" action="/split/done">
     <fieldset id="split1" style="display: none;">
       <select multiple class="form-control" id="document" name="document"
               required size="20">
