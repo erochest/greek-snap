@@ -10,6 +10,7 @@ module Handler.Split
 import           Application
 import           Codec.Archive.Zip
 import           Control.Applicative
+import           Control.Lens
 import           Control.Monad
 import           Control.Monad.IO.Class
 import           Data.ByteString            (ByteString)
@@ -35,6 +36,7 @@ import           Model
 import           Snap.Core
 import           Snap.Snaplet
 import           Snap.Snaplet.Fay
+import           Snap.Snaplet.Fay.Internal
 import           Snap.Snaplet.Heist
 import           Snap.Snaplet.Persistent
 import           Splices
@@ -57,7 +59,14 @@ handleSplit :: Handler App App ()
 handleSplit = do
     docs <- with pg $ runPersist $ selectList [] [Asc DocumentTitle]
     with fay $ do
-        renderWithSplices "split_form" $ documentListSplices docs
+        cfg <- getSnapletState
+        renderWithSplices "split_form" $ do
+            let cmode = compileMode $ view snapletValue cfg
+            documentListSplices docs
+            "scriptUrl" ## I.textSplice $ if cmode == Precompiled
+                                              then "/js/split.js"
+                                              else "/fay/split.js"
+
 
 handleSplitDone :: Handler App PersistState ()
 handleSplitDone = getSplitParams >>= maybe error500 done

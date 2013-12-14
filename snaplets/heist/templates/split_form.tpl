@@ -85,6 +85,6 @@
   </form>
 
   <bind tag="extra-scripts">
-    <script src="/fay/split.js" language="javascript"></script>
+    <script src="${scriptUrl}" language="javascript"></script>
   </bind>
 </apply>
