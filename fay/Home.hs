@@ -34,4 +34,4 @@ main = do
     onKeyUp input $ do
         indexS <- getAttribute "value" input
         index <- parseInt indexS
-        call (GetFib index) $ setInnerHTML result . show
+        call Noop $ setInnerHTML result . show

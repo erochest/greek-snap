@@ -11,6 +11,6 @@ import FFI
 --import Language.Fay.FFI
 #endif
 
-data Command = GetFib Int (Returns Int)
+data Command = Noop (Returns ())
     deriving (Read, Typeable, Data)
 
