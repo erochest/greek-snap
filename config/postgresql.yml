@@ -1,0 +1,24 @@
+Default: &defaults
+  user: greek-snap
+  password: greek-snap
+  host: localhost
+  port: 5432
+  database: greek-snap
+  poolsize: 10
+
+Development:
+  <<: *defaults
+
+Testing:
+  database: greek-snap_test
+  <<: *defaults
+
+Staging:
+  database: greek-snap_staging
+  poolsize: 100
+  <<: *defaults
+
+Production:
+  database: greek-snap_production
+  poolsize: 100
+  <<: *defaults
