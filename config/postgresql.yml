@@ -1,9 +1,9 @@
 Default: &defaults
-  user: greek-snap
-  password: greek-snap
+  user: dialoguer
+  password: dialoguer
   host: localhost
   port: 5432
-  database: greek-snap
+  database: dialoguer
   poolsize: 10
 
 Development:
