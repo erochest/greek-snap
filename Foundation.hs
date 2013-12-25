@@ -72,7 +72,17 @@ instance Yesod App where
         pc <- widgetToPageContent $ do
             $(combineStylesheets 'StaticR
                 [ css_normalize_css
-                , css_bootstrap_css
+                , css_bootstrap_min_css
+                , css_bootstrap_theme_min_css
+                , css_prism_css
+                , css_main_css
+                ])
+            addScriptEither $ urlJqueryJs master
+            $(combineScripts 'StaticR
+                [ js_vendor_bootstrap_min_js
+                , js_vendor_prism_js
+                , js_plugins_js
+                , js_main_js
                 ])
             $(widgetFile "default-layout")
         giveUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
@@ -108,7 +118,9 @@ instance Yesod App where
 
     makeLogger = return . appLogger
 
-instance YesodJquery App
+instance YesodJquery App where
+    urlJqueryJs _ = Left $ StaticR js_vendor_jquery_1_10_2_min_js
+
 instance YesodFay App where
 
     fayRoute = FaySiteR

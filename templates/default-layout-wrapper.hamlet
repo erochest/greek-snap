@@ -22,6 +22,7 @@ $newline never
 
         <script>
           document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/,'js');
+        <script src="@{StaticR js_vendor_modernizr_2_6_2_min_js}">
     <body>
         <div class="container">
             <header>
