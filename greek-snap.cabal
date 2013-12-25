@@ -24,6 +24,7 @@ library
                      Handler.Document
                      Handler.Fay
                      Handler.Home
+                     Text.XML.Split
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -76,8 +77,14 @@ library
                  , monad-logger                  >= 0.3
                  , fast-logger                   >= 2.0
                  , wai-logger                    >= 2.0
+                 , unordered-containers
+                 , dlist
                  , errors
                  , blaze-builder
+                 , xml-types
+                 , xml-conduit
+                 , system-filepath
+                 , lens
 
 executable         greek-snap
     if flag(library-only)
