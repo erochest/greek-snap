@@ -1,10 +1,15 @@
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards   #-}
 
 
 module Handler.Document where
 
 
-import Import
+import           Blaze.ByteString.Builder.ByteString
+import           Control.Error
+import qualified Data.Text as T
+import           Data.Text.Encoding (encodeUtf8)
+import           Import
 
 
 getDocumentListR :: Handler Html
@@ -19,6 +24,15 @@ getDocumentR documentId = do
     defaultLayout $ do
         $(widgetFile "document")
 
-getDocumentDownloadR :: DocumentId -> Handler TypedContent
-getDocumentDownloadR = undefined
+getDocumentDownloadR :: DocumentId -> Handler RepXml
+getDocumentDownloadR documentId = do
+    Document{..} <- runDB $ get404 documentId
+    let filename = fromMaybe filename
+                 . rightMay
+                 . lastErr ("error" :: T.Text)
+                 . T.splitOn "/"
+                 $ documentSourceFile
+    addHeader "Content-Disposition" $ "attachment; filename=" <> filename
+    return . RepXml . flip ContentBuilder Nothing . fromByteString
+           $ encodeUtf8 documentContent
 

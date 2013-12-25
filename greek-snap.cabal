@@ -76,6 +76,8 @@ library
                  , monad-logger                  >= 0.3
                  , fast-logger                   >= 2.0
                  , wai-logger                    >= 2.0
+                 , errors
+                 , blaze-builder
 
 executable         greek-snap
     if flag(library-only)
