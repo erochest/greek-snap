@@ -22,6 +22,7 @@ getDocumentR :: DocumentId -> Handler Html
 getDocumentR documentId = do
     Document{..} <- runDB $ get404 documentId
     defaultLayout $ do
+        setTitle $ toHtml documentTitle
         $(widgetFile "document")
 
 getDocumentDownloadR :: DocumentId -> Handler RepXml
