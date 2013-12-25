@@ -1,7 +1,7 @@
-<h1.pull-left>#{documentTitle}
-
-<div.pull-right>
-  <a.btn.btn-primary href=@{DocumentDownloadR documentId}>Download
+<h1.pull-left style="width: 100%;">
+  #{documentTitle}
+  <div.pull-right>
+    <a.btn.btn-primary href=@{DocumentDownloadR documentId}>Download
 
 <div.clearfix>
   &nbsp;
