@@ -1,3 +1,6 @@
+{-# LANGUAGE RecordWildCards #-}
+
+
 module Handler.Document where
 
 
@@ -11,7 +14,10 @@ getDocumentListR = do
         $(widgetFile "document_list")
 
 getDocumentR :: DocumentId -> Handler Html
-getDocumentR = undefined
+getDocumentR documentId = do
+    Document{..} <- runDB $ get404 documentId
+    defaultLayout $ do
+        $(widgetFile "document")
 
 getDocumentDownloadR :: DocumentId -> Handler TypedContent
 getDocumentDownloadR = undefined

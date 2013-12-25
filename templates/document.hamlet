@@ -1,0 +1,11 @@
+<h1.pull-left>#{documentTitle}
+
+<div.pull-right>
+  <a.btn.btn-primary href=@{DocumentDownloadR documentId}>Download
+
+<div.clearfix>
+  &nbsp;
+
+<pre>
+  <code.language-markup>
+    #{documentContent}
