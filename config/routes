@@ -6,3 +6,7 @@
 /robots.txt RobotsR GET
 
 / HomeR GET
+
+/documents/                      DocumentListR     GET
+/documents/#DocumentId/          DocumentR         GET
+/documents/#DocumentId/download/ DocumentDownloadR GET

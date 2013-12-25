@@ -1,0 +1,4 @@
+<ul.doclist>
+  $forall Entity dId (Document title _ _) <- docs
+    <li>
+      <a href=@{DocumentR dId}>#{title}

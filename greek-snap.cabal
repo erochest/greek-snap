@@ -21,6 +21,7 @@ library
                      Settings.StaticFiles
                      Settings.Development
                      SharedTypes
+                     Handler.Document
                      Handler.Fay
                      Handler.Home
 
