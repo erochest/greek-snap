@@ -24,6 +24,7 @@ library
                      Handler.Document
                      Handler.Fay
                      Handler.Home
+                     Handler.Split
                      Text.XML.Split
 
     if flag(dev) || flag(library-only)
