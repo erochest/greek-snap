@@ -1,65 +1,55 @@
-<div class="page-header">
-  <h1>
-    Split #
-    <small id="subtitle">
+<fieldset id="split1" style="display: none;">
+  <select multiple class="form-control" id="document" name="document"
+          required size="20">
+    $forall d <- olOptions docs
+      <option value="#{optionExternalValue d}">#{optionDisplay d}
 
-<div class="progress">
-  <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="3" style="width: 0%;">
-    <span class="sr-only">0% Complete
+  <div class="pull-right">
+    <button id="selectall" class="btn">
+      Select All #
+      <span class="glyphicon glyphicon-list">
+    <button id="splitnext1" class="btn btn-primary next">
+      Next #
+      <span class="glyphicon glyphicon-chevron-right">
 
-<form method="POST" action=@{SplitR}>
-  <fieldset id="split1" style="display: none;">
-    <select multiple class="form-control" id="document" name="document"
-            required size="20">
-      $forall (documentId, Document title _ _) <- docs
-        <option value="#{documentId}">#{title}
-
-    <div class="pull-right">
-      <button id="selectall" class="btn">
-        Select All #
-        <span class="glyphicon glyphicon-list">
-      <button id="splitnext1" class="btn btn-primary next">
-        Next #
-        <span class="glyphicon glyphicon-chevron-right">
-
-  <fieldset id="split2" style="display: none;">
-    <ul class="list-group form-group">
-      <li class="list-group-item">
-        <label>
-          <input type="radio" name="division" id="division1" value="document">
-          <em>Documents
-          \ keep each dialogue as its own document.
-      <li class="list-group-item">
-        <label>
-          <input type="radio" name="division" id="division2" value="section">
-          <em>Sections
-          \ are smaller groupings within the document.
-      <li class="list-group-item">
-        <label>
-          <input type="radio" name="division" id="division3" value="page">
-          <em>Pages
-          \ are larger groupings within the document.
-      <li class="list-group-item">
-        <label>
-          <input type="radio" name="division" id="division4" value="sp">
-          <em>Speaking parts
-          \ are made by group everything each speaker's says in the dialogue into one document. Obviously, this does the most violence to the original.
-    <div class="pull-right">
-      <button id="splitnext2" class="btn btn-primary next">
-        Next #
-        <span class="glyphicon glyphicon-chevron-right">
-
-  <fieldset id="split3" style="display: none;">
-    <div class="form-group">
+<fieldset id="split2" style="display: none;">
+  <ul class="list-group form-group">
+    <li class="list-group-item">
       <label>
-        <input type="text" name="chunksize" id="chunksize" value="500">
-        <em>Chunk Size
-        \ is the number of tokens to include in each window of text.
+        <input type="radio" name="division" id="division1" value="document">
+        <em>Documents
+        \ keep each dialogue as its own document.
+    <li class="list-group-item">
       <label>
-        <input type="text" name="chunkoffset" id="chunkoffset" value="250">
-        <em>Chunk Offset
-        \ is how far to slide the window over each step through the document.
-    <div class="pull-right">
-      <button id="splitdone" class="btn btn-success next" type="submit">
-        Done #
-        <span class="glyphicon glyphicon-cloud-download">
+        <input type="radio" name="division" id="division2" value="section">
+        <em>Sections
+        \ are smaller groupings within the document.
+    <li class="list-group-item">
+      <label>
+        <input type="radio" name="division" id="division3" value="page">
+        <em>Pages
+        \ are larger groupings within the document.
+    <li class="list-group-item">
+      <label>
+        <input type="radio" name="division" id="division4" value="sp">
+        <em>Speaking parts
+        \ are made by group everything each speaker's says in the dialogue into one document. Obviously, this does the most violence to the original.
+  <div class="pull-right">
+    <button id="splitnext2" class="btn btn-primary next">
+      Next #
+      <span class="glyphicon glyphicon-chevron-right">
+
+<fieldset id="split3" style="display: none;">
+  <div class="form-group">
+    <label>
+      <input type="text" name="chunksize" id="chunksize" value="500">
+      <em>Chunk Size
+      \ is the number of tokens to include in each window of text.
+    <label>
+      <input type="text" name="chunkoffset" id="chunkoffset" value="250">
+      <em>Chunk Offset
+      \ is how far to slide the window over each step through the document.
+  <div class="pull-right">
+    <button id="splitdone" class="btn btn-success next" type="submit">
+      Done #
+      <span class="glyphicon glyphicon-cloud-download">
