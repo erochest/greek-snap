@@ -1,0 +1,3 @@
+setTimeout(function() {
+	window.location = "@{SplitDownloadR}?" + #{toJSON urlParams};
+}, 3000);

@@ -16,22 +16,22 @@
   <ul class="list-group form-group">
     <li class="list-group-item">
       <label>
-        <input type="radio" name="division" id="division1" value="document">
+        <input type="radio" name="division" id="division-document" value="1">
         <em>Documents
         \ keep each dialogue as its own document.
     <li class="list-group-item">
       <label>
-        <input type="radio" name="division" id="division2" value="section">
+        <input type="radio" name="division" id="division-section" value="2">
         <em>Sections
         \ are smaller groupings within the document.
     <li class="list-group-item">
       <label>
-        <input type="radio" name="division" id="division3" value="page">
+        <input type="radio" name="division" id="division-page" value="3">
         <em>Pages
         \ are larger groupings within the document.
     <li class="list-group-item">
       <label>
-        <input type="radio" name="division" id="division4" value="sp">
+        <input type="radio" name="division" id="division-sp" value="4">
         <em>Speaking parts
         \ are made by group everything each speaker's says in the dialogue into one document. Obviously, this does the most violence to the original.
   <div class="pull-right">

@@ -1,0 +1,4 @@
+<div .alert .alert-success>
+  You download should begin soon. If it doesn't #
+  <a href="@{SplitDownloadR}?#{urlParams}">
+    click here.
