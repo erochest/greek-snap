@@ -86,6 +86,8 @@ library
                  , xml-conduit
                  , system-filepath
                  , lens
+                 , zip-archive
+                 , time
 
 executable         greek-snap
     if flag(library-only)
