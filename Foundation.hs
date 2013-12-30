@@ -69,6 +69,14 @@ instance Yesod App where
         -- value passed to hamletToRepHtml cannot be a widget, this allows
         -- you to use normal widget features in default-layout.
 
+        route <- getCurrentRoute
+        let isHome      = route == Just HomeR
+            isDocuments = case route of
+                              Just DocumentListR -> True
+                              Just (DocumentR _) -> True
+                              _                  -> False
+            isSplit     = route == Just SplitR
+
         pc <- widgetToPageContent $ do
             $(combineStylesheets 'StaticR
                 [ css_normalize_css
