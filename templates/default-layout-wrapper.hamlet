@@ -29,11 +29,11 @@ $newline never
               <nav.navbar.navbar-default role="navigation">
                 <div#navbar-collapse.collapse.navbar-collapse>
                   <ul.nav.navbar-nav>
-                    <li :isHome:.active>
+                    <li :isHome route:.active>
                       <a href=@{HomeR}>Home
-                    <li :isDocuments:.active>
+                    <li :isDocuments route:.active>
                       <a href=@{DocumentListR}>Documents
-                    <li :isSplit:.active>
+                    <li :isSplit route:.active>
                       <a href=@{SplitR}>Split
             <div id="main" role="main">
               ^{pageBody pc}

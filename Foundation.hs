@@ -61,21 +61,14 @@ instance Yesod App where
 
     defaultLayout widget = do
         master <- getYesod
-        mmsg <- getMessage
+        mmsg   <- getMessage
+        route  <- getCurrentRoute
 
         -- We break up the default layout into two components:
         -- default-layout is the contents of the body tag, and
         -- default-layout-wrapper is the entire page. Since the final
         -- value passed to hamletToRepHtml cannot be a widget, this allows
         -- you to use normal widget features in default-layout.
-
-        route <- getCurrentRoute
-        let isHome      = route == Just HomeR
-            isDocuments = case route of
-                              Just DocumentListR -> True
-                              Just (DocumentR _) -> True
-                              _                  -> False
-            isSplit     = route == Just SplitR
 
         pc <- widgetToPageContent $ do
             $(combineStylesheets 'StaticR
@@ -172,6 +165,19 @@ instance RenderMessage App FormMessage where
 -- | Get the 'Extra' value, used to hold data from the settings.yml file.
 getExtra :: Handler Extra
 getExtra = fmap (appExtra . settings) getYesod
+
+isHome :: Maybe (Route App) -> Bool
+isHome (Just HomeR) = True
+isHome _            = False
+
+isDocuments :: Maybe (Route App) -> Bool
+isDocuments (Just DocumentListR) = True
+isDocuments (Just (DocumentR _)) = True
+isDocuments _                    = False
+
+isSplit :: Maybe (Route App) -> Bool
+isSplit (Just SplitR) = True
+isSplit _             = False
 
 -- Note: previous versions of the scaffolding included a deliver function to
 -- send emails. Unfortunately, there are too many different options for us to
