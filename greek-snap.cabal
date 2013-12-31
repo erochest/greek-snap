@@ -88,6 +88,7 @@ library
                  , lens
                  , zip-archive
                  , time
+                 , heroku
 
 executable         greek-snap
     if flag(library-only)
