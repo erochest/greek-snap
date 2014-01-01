@@ -8,13 +8,13 @@ module Split where
 
 
 import           DOM
-import           Fay.Text
-import qualified Fay.Text as T
 import           FFI
 import           JQuery
-import           Language.Fay.Yesod
+import           Language.Fay.Yesod hiding (Text, fromString, toString)
 import           Prelude
 import           SharedTypes
+import           Fay.Text
+import qualified Fay.Text as T
 
 
 log' :: Text -> Fay ()

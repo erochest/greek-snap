@@ -26,6 +26,9 @@ library
                      Handler.Home
                      Handler.Split
                      Text.XML.Split
+                     Language.Fay.Yesod
+                     Yesod.Fay
+                     Yesod.Fay.Data
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -54,7 +57,7 @@ library
                  , yesod-auth                    >= 1.2        && < 1.3
                  , yesod-static                  >= 1.2        && < 1.3
                  , yesod-form                    >= 1.3        && < 1.4
-                 , yesod-fay                     >= 0.4
+                 -- , yesod-fay                     >= 0.4
                  , fay                           >= 0.16
                  , bytestring                    >= 0.9        && < 0.11
                  , text                          >= 0.11       && < 0.12
@@ -89,6 +92,11 @@ library
                  , zip-archive
                  , time
                  , heroku
+                 -- For yesod-fay
+                 , system-fileio
+                 , pureMD5
+                 , utf8-string
+                 , monad-loops
 
 executable         greek-snap
     if flag(library-only)
