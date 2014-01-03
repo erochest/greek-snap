@@ -15,5 +15,5 @@ Staging:
   <<: *defaults
 
 Production:
-  #approot: "http://www.example.com"
+  approot: "http://thawing-scrubland-6072.herokuapp.com"
   <<: *defaults
