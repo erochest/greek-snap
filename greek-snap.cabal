@@ -26,6 +26,7 @@ library
                      Handler.Home
                      Handler.Split
                      Handler.Version
+                     Text.Greek.Tokenize
                      Text.XML.Split
                      Language.Fay.Yesod
                      Yesod.Fay
@@ -94,6 +95,7 @@ library
                  , zip-archive
                  , time
                  , heroku
+                 , text-icu
                  -- For yesod-fay
                  , system-fileio
                  , pureMD5
