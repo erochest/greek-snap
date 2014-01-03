@@ -13,3 +13,5 @@
 
 /split/          SplitR         GET POST
 /split/download/ SplitDownloadR GET
+
+/version VersionR GET

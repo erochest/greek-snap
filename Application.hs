@@ -36,6 +36,7 @@ import Handler.Document
 import Handler.Fay
 import Handler.Home
 import Handler.Split
+import Handler.Version
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the
@@ -104,7 +105,7 @@ combineMappings _ _ = error "Data.Object is not a Mapping."
 loadHerokuConfig :: IO AT.Value
 loadHerokuConfig = do
 #ifdef DEVELOPMENT
-    return $ AT.Object M.empty
+    return $ AT.Object H.empty
 #else
     Web.Heroku.dbConnParams >>= return . toMapping . Import.map canonicalizeKey
 #endif

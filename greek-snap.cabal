@@ -25,10 +25,12 @@ library
                      Handler.Fay
                      Handler.Home
                      Handler.Split
+                     Handler.Version
                      Text.XML.Split
                      Language.Fay.Yesod
                      Yesod.Fay
                      Yesod.Fay.Data
+                     Paths_greek_snap
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
