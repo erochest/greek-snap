@@ -38,7 +38,10 @@ $newline never
                   <ul.nav.navbar-nav.navbar-right>
                     $maybe Entity _ user <- mauthUser
                       <li>
-                        <p.navbar-text>#{userIdent user}
+                        <p.navbar-text>
+                          $if admin
+                            <span .glyphicon.glyphicon-star-empty>
+                          \ #{userIdent user}
                       <li.divider>
                       <li>
                         <a href=@{AuthR LogoutR}>Logout

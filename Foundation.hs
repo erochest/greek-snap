@@ -68,6 +68,7 @@ instance Yesod App where
         mmsg      <- getMessage
         route     <- getCurrentRoute
         mauthUser <- maybeAuth
+        admin     <- maybe (return False) isAdmin mauthUser
 
         -- We break up the default layout into two components:
         -- default-layout is the contents of the body tag, and

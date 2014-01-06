@@ -2,12 +2,17 @@ User
     ident Text
     password Text Maybe
     UniqueUser ident
-    deriving Typeable
+    deriving Show Typeable
 Email
     email Text
     user UserId Maybe
     verkey Text Maybe
     UniqueEmail email
+UserProfile
+    user UserId
+    isAdmin Bool default=false
+    UniqueUserProfile user
+    deriving Show Typeable
 Document
     title Text
     content Text
