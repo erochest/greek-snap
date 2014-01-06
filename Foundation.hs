@@ -5,6 +5,9 @@ import Yesod
 import Yesod.Static
 import Yesod.Auth
 import Yesod.Auth.BrowserId
+#if DEVELOPMENT
+import Yesod.Auth.Dummy
+#endif
 import Yesod.Auth.GoogleEmail
 import Yesod.Default.Config
 import Yesod.Default.Util (addStaticContentExternal)
@@ -61,9 +64,10 @@ instance Yesod App where
         "config/client_session_key.aes"
 
     defaultLayout widget = do
-        master <- getYesod
-        mmsg   <- getMessage
-        route  <- getCurrentRoute
+        master    <- getYesod
+        mmsg      <- getMessage
+        route     <- getCurrentRoute
+        mauthUser <- maybeAuth
 
         -- We break up the default layout into two components:
         -- default-layout is the contents of the body tag, and
@@ -154,7 +158,12 @@ instance YesodAuth App where
                 fmap Just $ insert $ User (credsIdent creds) Nothing
 
     -- You can add other plugins like BrowserID, email or OAuth here
-    authPlugins _ = [authBrowserId def, authGoogleEmail]
+    authPlugins _ = [ authBrowserId def
+                    , authGoogleEmail
+#if DEVELOPMENT
+                    , authDummy
+#endif
+                    ]
 
     authHttpManager = httpManager
 
