@@ -190,6 +190,10 @@ isSplit :: Maybe (Route App) -> Bool
 isSplit (Just SplitR) = True
 isSplit _             = False
 
+isStopList :: Maybe (Route App) -> Bool
+isStopList (Just StopListR) = True
+isStopList _                = False
+
 -- Note: previous versions of the scaffolding included a deliver function to
 -- send emails. Unfortunately, there are too many different options for us to
 -- give a reasonable default. Instead, the information is available on the

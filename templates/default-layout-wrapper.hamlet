@@ -35,6 +35,8 @@ $newline never
                       <a href=@{DocumentListR}>Documents
                     <li :isSplit route:.active>
                       <a href=@{SplitR}>Split
+                    <li :isStopList route:.active>
+                      <a href=@{StopListR}>Stop List
                   <ul.nav.navbar-nav.navbar-right>
                     $maybe Entity _ user <- mauthUser
                       <li>

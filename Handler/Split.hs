@@ -24,8 +24,6 @@ import           Text.XML.Split
 import qualified Text.XML.Split            as S
 
 
-data Hole = Hole
-
 getSplitR :: Handler Html
 getSplitR = do
     docs <- documentOptions

@@ -36,6 +36,7 @@ import Handler.Document
 import Handler.Fay
 import Handler.Home
 import Handler.Split
+import Handler.StopList
 import Handler.Version
 
 -- This line actually creates our YesodDispatch instance. It is the second half

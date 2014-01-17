@@ -23,8 +23,6 @@ module Text.XML.Split
 
 import           Control.Applicative
 import           Control.Lens
-import           Data.Conduit
-import qualified Data.Conduit.List         as CL
 import qualified Data.DList                as D
 import qualified Data.HashMap.Strict       as M
 import qualified Data.List                 as L
@@ -34,7 +32,7 @@ import qualified Data.Text.IO              as TIO
 import           Data.XML.Types            hiding (Document)
 import           Filesystem.Path.CurrentOS
 import           Prelude                   hiding (FilePath)
-import           Text.XML.Stream.Parse
+import           Text.XML.Utils
 
 
 -- Types and Lenses
@@ -85,11 +83,7 @@ splitDocument division chunkSpec inputPath xmlText =
          . filter (not . T.null . snd)
          . map (fmap T.strip)
          . finFoldState division
-         ) . runResourceT $
-        CL.sourceList [xmlText]
-                $= parseText def
-                $= CL.map snd
-                $$ CL.fold (onElement division) initFoldState
+         ) $ foldEvents (onElement division) initFoldState xmlText
     where chunk' = uncurry chunk chunkSpec
           base   = basename inputPath
           split' = uncurry $ \d -> zipWith (Split base d) [0..]

@@ -25,9 +25,11 @@ library
                      Handler.Fay
                      Handler.Home
                      Handler.Split
+                     Handler.StopList
                      Handler.Version
                      Text.Greek.Tokenize
                      Text.XML.Split
+                     Text.XML.Utils
                      Language.Fay.Yesod
                      Yesod.Fay
                      Yesod.Fay.Data
@@ -84,7 +86,9 @@ library
                  , monad-logger                  >= 0.3
                  , fast-logger                   >= 2.0
                  , wai-logger                    >= 2.0
+                 , transformers
                  , unordered-containers
+                 , hashable
                  , dlist
                  , errors
                  , blaze-builder

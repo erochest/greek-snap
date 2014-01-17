@@ -14,4 +14,8 @@
 /split/          SplitR         GET POST
 /split/download/ SplitDownloadR GET
 
+/stoplist/      StopListR     GET
+/stoplist/json/ StopListJsonR GET
+/stoplist/text/ StopListTextR GET
+
 /version VersionR GET

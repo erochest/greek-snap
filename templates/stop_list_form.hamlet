@@ -1,0 +1,10 @@
+<form .form method="GET" action=@{StopListR} enctype=#{encType}>
+  <fieldset>
+    $case result
+      $of FormFailure reasons
+        $forall reason <- reasons
+          <div .alert .alert-danger>#{reason}
+      $of _
+    ^{widget}
+    <div .form-actions>
+      <input .btn.primary type="submit" value="Generate Stop List">

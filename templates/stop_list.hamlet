@@ -1,0 +1,16 @@
+<h1>Stop List
+
+<div .btn-group.pull-right>
+  <a .btn.btn-info href="@{StopListTextR}?#{params}">Text
+  <a .btn.btn-info href="@{StopListJsonR}?#{params}">JSON
+
+<table .table>
+  <thead>
+    <tr>
+      <th>Token
+      <th>Frequency
+  <tbody>
+    $forall (t, f) <- stopList
+      <tr>
+        <td>#{t}
+        <td>#{f}
