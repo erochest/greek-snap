@@ -10,6 +10,8 @@ import           Control.Error
 import qualified Data.Text as T
 import           Data.Text.Encoding (encodeUtf8)
 import           Import
+import           Text.Greek.Tokenize
+import           Text.XML.Utils (getText)
 
 
 getDocumentListR :: Handler Html
@@ -36,4 +38,9 @@ getDocumentDownloadR documentId = do
     addHeader "Content-Disposition" $ "attachment; filename=" <> filename
     return . RepXml . flip ContentBuilder Nothing . fromByteString
            $ encodeUtf8 documentContent
+
+getDocumentTokensR :: DocumentId -> Handler RepPlain
+getDocumentTokensR documentId =
+        documentContent <$> runDB (get404 documentId)
+    >>= liftIO . fmap (repPlain . (<> "\n") . T.intercalate "\n" . tokenize) . getText
 

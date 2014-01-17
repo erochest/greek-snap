@@ -10,6 +10,7 @@
 /documents/                      DocumentListR     GET
 /documents/#DocumentId/          DocumentR         GET
 /documents/#DocumentId/download/ DocumentDownloadR GET
+/documents/#DocumentId/tokens/   DocumentTokensR   GET
 
 /split/          SplitR         GET POST
 /split/download/ SplitDownloadR GET
