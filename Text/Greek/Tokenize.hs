@@ -23,7 +23,8 @@ grc :: LocaleName
 grc = Locale "grc"
 
 tokenize :: T.Text -> [T.Text]
-tokenize = map brkBreak
+tokenize = filter (/= " ")
+         . map brkBreak
          . filter ((/= Uncategorized) . brkStatus)
          . breaks (breakWord grc)
 
