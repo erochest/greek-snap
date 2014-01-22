@@ -7,9 +7,14 @@ module Handler.StopList where
 
 
 import           Control.Monad.Trans.Writer (Writer)
+import           Data.Char
+import qualified Data.List                  as L
 import           Data.Maybe
 import           Data.Monoid
 import qualified Data.Text                  as T
+import qualified Data.Text.Lazy             as TL
+import           Data.Text.Lazy.Builder
+import           Data.Text.Lazy.Builder.Int
 import           Import
 import           Text.Greek.Tokenize
 import           Text.XML.Utils
@@ -53,12 +58,20 @@ showForm result widget encType = defaultLayout $ do
 showStopList :: StopListSpec -> [(T.Text, Double)] -> Writer (Endo [ProvidedRep Handler]) ()
 showStopList spec stopList = do
     provideRep $ defaultLayout $ do
+        let stopList' = map decorate $ zip ([1..] :: [Int]) stopList
         setTitle "Stop List"
         let params = toParams spec
         $(widgetFile "stop_list")
     provideRep $ stopListText stopList
     provideRep $ stopListJson stopList
     where addp name = fmap (T.append name . T.pack . show)
+          codes = TL.toStrict
+                . toLazyText
+                . foldr mappend mempty
+                . L.intersperse (singleton ' ')
+                . map (mappend "U+" . hexadecimal . ord)
+                . T.unpack
+          decorate (i, (t, f)) = (i, t, codes t, f)
 
 altHandler :: ([(T.Text, Double)] -> Handler a) -> Handler a
 altHandler h = do

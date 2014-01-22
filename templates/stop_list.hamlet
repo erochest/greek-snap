@@ -7,10 +7,14 @@
 <table .table>
   <thead>
     <tr>
+      <th>N
       <th>Token
+      <th>Codes
       <th>Frequency
   <tbody>
-    $forall (t, f) <- stopList
+    $forall (i, t, c, f) <- stopList'
       <tr>
+        <td>#{i}
         <td>#{t}
+        <td>#{c}
         <td>#{f}
