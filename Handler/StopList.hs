@@ -58,20 +58,13 @@ showForm result widget encType = defaultLayout $ do
 showStopList :: StopListSpec -> [(T.Text, Double)] -> Writer (Endo [ProvidedRep Handler]) ()
 showStopList spec stopList = do
     provideRep $ defaultLayout $ do
-        let stopList' = map decorate $ zip ([1..] :: [Int]) stopList
+        let stopList' = showCodes $ fullStopList stopList
         setTitle "Stop List"
         let params = toParams spec
         $(widgetFile "stop_list")
     provideRep $ stopListText stopList
     provideRep $ stopListJson stopList
     where addp name = fmap (T.append name . T.pack . show)
-          codes = TL.toStrict
-                . toLazyText
-                . foldr mappend mempty
-                . L.intersperse (singleton ' ')
-                . map (mappend "U+" . hexadecimal . ord)
-                . T.unpack
-          decorate (i, (t, f)) = (i, t, codes t, f)
 
 altHandler :: ([(T.Text, Double)] -> Handler a) -> Handler a
 altHandler h = do
@@ -84,10 +77,26 @@ getStopListJsonR :: Handler RepJson
 getStopListJsonR = altHandler stopListJson
 
 stopListJson :: [(T.Text, Double)] -> Handler RepJson
-stopListJson = return . repJson . array . map toObj
-    where toObj (t, f) = object [ "token" .= t
-                                , "freq"  .= f
-                                ]
+stopListJson = return . repJson . array . map toObj . fullStopList
+    where toObj (n, t, c, f) = object [ "n"     .= n
+                                      , "token" .= t
+                                      , "codes" .= c
+                                      , "freq"  .= f
+                                      ]
+
+fullStopList :: [(T.Text, Double)] -> [(Int, T.Text, [Int], Double)]
+fullStopList = map decorate . zip [1..]
+    where codes = map ord . T.unpack
+          decorate (i, (t, f)) = (i, t, codes t, f)
+
+showCodes :: [(Int, T.Text, [Int], Double)] -> [(Int, T.Text, T.Text, Double)]
+showCodes = map (onThird showCodes')
+    where onThird f (a, b, c, d) = (a, b, f c, d)
+          showCodes' = TL.toStrict
+                     . toLazyText
+                     . foldr mappend mempty
+                     . L.intersperse (singleton ' ')
+                     . map (mappend "U+" . hexadecimal)
 
 getStopListTextR :: Handler RepPlain
 getStopListTextR = altHandler stopListText
