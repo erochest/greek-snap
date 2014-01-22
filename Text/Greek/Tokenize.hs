@@ -9,6 +9,7 @@ module Text.Greek.Tokenize
     ) where
 
 
+import           Data.Char           (isSpace)
 import           Data.Hashable
 import qualified Data.HashMap.Strict as M
 import           Data.List           (foldl')
@@ -23,7 +24,7 @@ grc :: LocaleName
 grc = Locale "grc"
 
 tokenize :: T.Text -> [T.Text]
-tokenize = filter (/= " ")
+tokenize = filter (not . T.all isSpace)
          . map brkBreak
          . filter ((/= Uncategorized) . brkStatus)
          . breaks (breakWord grc)
