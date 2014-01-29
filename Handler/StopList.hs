@@ -56,14 +56,14 @@ showForm result widget encType = defaultLayout $ do
     $(widgetFile "stop_list_form")
 
 showStopList :: StopListSpec -> [(T.Text, Double)] -> Writer (Endo [ProvidedRep Handler]) ()
-showStopList spec stopList = do
+showStopList spec stops = do
     provideRep $ defaultLayout $ do
-        let stopList' = showCodes $ fullStopList stopList
+        let stopList' = showCodes $ fullStopList stops
         setTitle "Stop List"
         let params = toParams spec
         $(widgetFile "stop_list")
-    provideRep $ stopListText stopList
-    provideRep $ stopListJson stopList
+    provideRep $ stopListText stops
+    provideRep $ stopListJson stops
     where addp name = fmap (T.append name . T.pack . show)
 
 altHandler :: ([(T.Text, Double)] -> Handler a) -> Handler a
