@@ -1,9 +1,9 @@
 Default: &defaults
-  user: dialoguer
-  password: dialoguer
+  user: greek
+  password: greek
   host: localhost
   port: 5432
-  database: dialoguer
+  database: greek
   poolsize: 10
 
 Development:
