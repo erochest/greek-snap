@@ -12,7 +12,7 @@ Flag library-only
     Default:       False
 
 library
-    hs-source-dirs: ., fay-shared
+    hs-source-dirs: .
     exposed-modules: Application
                      Foundation
                      Import
@@ -20,9 +20,7 @@ library
                      Settings
                      Settings.StaticFiles
                      Settings.Development
-                     SharedTypes
                      Handler.Document
-                     Handler.Fay
                      Handler.Home
                      Handler.Split
                      Handler.StopList
@@ -30,9 +28,6 @@ library
                      Text.Greek.Tokenize
                      Text.XML.Split
                      Text.XML.Utils
-                     Language.Fay.Yesod
-                     Yesod.Fay
-                     Yesod.Fay.Data
                      Paths_greek_snap
 
     if flag(dev) || flag(library-only)
@@ -62,8 +57,6 @@ library
                  , yesod-auth                    >= 1.2        && < 1.3
                  , yesod-static                  >= 1.2        && < 1.3
                  , yesod-form                    >= 1.3        && < 1.4
-                 -- , yesod-fay                     >= 0.4
-                 , fay                           >= 0.16
                  , bytestring                    >= 0.9        && < 0.11
                  , text                          >= 0.11       && < 1.1
                  , persistent                    >= 1.3        && < 1.4
@@ -100,11 +93,6 @@ library
                  , time
                  , heroku
                  , text-icu
-                 -- For yesod-fay
-                 , system-fileio
-                 , pureMD5
-                 , utf8-string
-                 , monad-loops
 
 executable         greek-snap
     if flag(library-only)

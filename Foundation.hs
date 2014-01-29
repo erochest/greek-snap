@@ -20,8 +20,6 @@ import Settings.StaticFiles
 import Settings (widgetFile, Extra (..))
 import Model
 import Text.Hamlet (hamletFile)
-import Yesod.Fay
-import Yesod.Fay.Data
 import Yesod.Core.Types (Logger)
 
 -- | The site argument for your application. This can be a good place to
@@ -34,7 +32,6 @@ data App = App
     , connPool :: Database.Persist.PersistConfigPool Settings.PersistConf -- ^ Database connection pool.
     , httpManager :: Manager
     , persistConfig :: Settings.PersistConf
-    , fayCommandHandler :: CommandHandler App
     , appLogger :: Logger
     }
 
@@ -84,10 +81,10 @@ instance Yesod App where
                 , css_prism_css
                 , css_main_css
                 ])
-            addScriptEither $ urlJqueryJs master
             $(combineScripts 'StaticR
                 [ js_vendor_bootstrap_min_js
                 , js_vendor_prism_js
+                , js_vendor_jquery_1_10_2_min_js
                 , js_plugins_js
                 , js_main_js
                 ])
@@ -124,17 +121,6 @@ instance Yesod App where
         development || level == LevelWarn || level == LevelError
 
     makeLogger = return . appLogger
-
-instance YesodJquery App where
-    urlJqueryJs _ = Left $ StaticR js_vendor_jquery_1_10_2_min_js
-
-instance YesodFay App where
-
-    fayRoute = FaySiteR
-
-    yesodFayCommand render command = do
-        master <- getYesod
-        fayCommandHandler master render command
 
 -- How to run database actions.
 instance YesodPersist App where

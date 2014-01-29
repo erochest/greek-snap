@@ -18,7 +18,6 @@ import qualified Network.Wai.Middleware.RequestLogger as RequestLogger
 import qualified Database.Persist
 import Database.Persist.Sql (runMigration)
 import Network.HTTP.Conduit (newManager, conduitManagerSettings)
-import Yesod.Fay (getFaySite)
 import Control.Monad.Logger (runLoggingT)
 import System.Log.FastLogger (newStdoutLoggerSet, defaultBufSize)
 import Network.Wai.Logger (clockDateCacher)
@@ -33,7 +32,6 @@ import qualified Web.Heroku
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
 import Handler.Document
-import Handler.Fay
 import Handler.Home
 import Handler.Split
 import Handler.StopList
@@ -81,7 +79,7 @@ makeFoundation conf = do
     (getter, _) <- clockDateCacher
 
     let logger = Yesod.Core.Types.Logger loggerSet' getter
-        foundation = App conf s p manager dbconf onCommand logger
+        foundation = App conf s p manager dbconf logger
 
     -- Perform database migration using our application's logging settings.
     runLoggingT

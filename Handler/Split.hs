@@ -17,7 +17,7 @@ import qualified Data.Text.Encoding        as E
 import           Data.Time.Clock.POSIX
 import           Database.Persist
 import           Import
-import           Language.Haskell.TH       (Exp(..))
+-- import           Language.Haskell.TH       (Exp(..))
 import qualified Filesystem.Path.CurrentOS as FS
 
 import           Text.XML.Split
@@ -29,7 +29,6 @@ getSplitR = do
     docs <- documentOptions
     let formWidget = splitFormWidget docs
     defaultLayout $ do
-        $(fayFile' (ConE 'StaticR) "Split")
         $(widgetFile "split")
 
 postSplitR :: Handler Html
