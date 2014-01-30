@@ -1,1 +1,1 @@
-web: ./greek-snap production -p $PORT
+web: cabal run -- -p $PORT
