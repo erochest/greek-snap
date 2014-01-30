@@ -82,9 +82,9 @@ instance Yesod App where
                 , css_main_css
                 ])
             $(combineScripts 'StaticR
-                [ js_vendor_bootstrap_min_js
+                [ js_vendor_jquery_1_10_2_min_js
+                , js_vendor_bootstrap_min_js
                 , js_vendor_prism_js
-                , js_vendor_jquery_1_10_2_min_js
                 , js_plugins_js
                 , js_main_js
                 ])
