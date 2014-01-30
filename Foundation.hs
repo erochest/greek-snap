@@ -98,7 +98,8 @@ instance Yesod App where
     urlRenderOverride _ _ = Nothing
 
     -- The page to be redirected to when authentication is required.
-    authRoute _ = Just $ AuthR LoginR
+    -- authRoute _ = Just $ AuthR LoginR
+    authRoute _ = Nothing
 
     -- This function creates static content files in the static folder
     -- and names them based on a hash of their content. This allows
