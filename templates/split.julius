@@ -1,0 +1,53 @@
+
+jQuery(function() {
+
+    var field_sets = [
+        {division: "document",  id: "#split1"},
+        {division: "divisions", id: "#split2"},
+        {division: "chunks",    id: "#split3"}
+        ];
+
+    var setProgress = function(valueNow, valueMax, progressBar) {
+        var width = 100.0 * valueNow / valueMax;
+        console.log('setProgress', valueNow, valueMax, width, progressBar);
+        progressBar
+            .attr('aria-valuenow', valueNow)
+            .attr('style', 'width: ' + width + '%;')
+    };
+
+    var doPage = function(i) {
+        var current_set = field_sets[i],
+            current     = $(current_set.id),
+            subtitle    = $('#subtitle');
+
+        subtitle.text(current_set.division);
+
+        $('.progress-bar').each(function(_, el) {
+            setProgress(i, 3, $(el));
+        });
+        current.show('slow');
+
+        if (i < (field_sets.length - 1)) {
+            $('button.next', current).on('click', function(ev) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                current.hide('slow');
+                setTimeout(function() { doPage(i + 1); }, 1);
+                return false;
+            });
+        }
+    };
+
+    // First reset everything.
+    $('#selectall').on('click', function(ev) {
+        ev.preventDefault();
+        $('#document option').each(function(i, el) {
+            $(el).prop('selected', true);
+            return true;
+        });
+    });
+
+    doPage(0);
+
+});
+
