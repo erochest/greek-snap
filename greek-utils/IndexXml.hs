@@ -4,7 +4,6 @@
 {-# OPTIONS_GHC -Wall #-}
 
 -- TODOS:
--- [ ] list hit locations, grouped by files and ordered by line
 -- [ ] list hit contexts, grouped by files and ordered by line
 -- [ ] combine hit contexts
 -- [ ] get contexts from files and print them
@@ -25,6 +24,7 @@ import qualified Data.Conduit.Binary       as CB
 import qualified Data.Conduit.List         as CL
 import qualified Data.DList                as D
 import qualified Data.HashMap.Strict       as M
+import qualified Data.List                 as L
 import           Data.Maybe
 import           Data.Monoid
 import qualified Data.Text                 as T
@@ -104,7 +104,9 @@ main :: IO ()
 main = do
     IX{..} <- execParser indexXmlOpts
     index  <- foldM indexFile M.empty =<< listDirectory xmlDir
-    undefined
+    let hits = L.sort . maybe [] D.toList $ M.lookup queryTerm index
+    forM_ hits $ \(filename, prange) ->
+        putStrLn $ encodeString filename ++ ":" ++ show prange
 
 data IndexXml = IX
               { xmlDir       :: FilePath
