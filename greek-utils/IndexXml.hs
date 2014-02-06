@@ -22,8 +22,6 @@ import           Data.Monoid
 import qualified Data.Text                 as T
 import           Data.Text.ICU
 import           Data.XML.Types
--- import           Database.Persist
--- import           Database.Persist.Sqlite
 import           Filesystem
 import           Filesystem.Path.CurrentOS hiding (filename)
 import qualified Filesystem.Path.CurrentOS as FS
@@ -31,7 +29,6 @@ import           Options.Applicative
 import           Prelude                   hiding (FilePath, break, lines)
 import           Text.XML.Stream.Parse
 
--- import           Db
 import           Utils
 
 import           Debug.Trace
@@ -94,13 +91,6 @@ indexTokens :: FilePath -> InvertedIndex -> (PositionRange, T.Text)
 indexTokens filename index (pos, token) =
     M.insertWith mappend token (D.singleton (filename, pos)) index
 
-{-
- - persistIndex = do
- -     runSqlite (T.pack $ encodeString sqliteFile) $ do
- -         runMigration migrateAll
- -         persistIndex index
- -}
-
 
 main :: IO ()
 main = do
@@ -112,7 +102,6 @@ data IndexXml = IX
               { xmlDir       :: FilePath
               , contextLines :: Int
               , queryTerm    :: T.Text
-              -- , sqliteFile :: FilePath
               } deriving (Show)
 
 indexXmlOpts :: ParserInfo IndexXml
@@ -133,13 +122,4 @@ indexXml =   IX
                             \ each hit. (default = 2)")
         <*> argument (Just . T.pack)
                      (metavar "QUERY" <> help "The query to search for.")
-         {-
-          - <*> fileOption (  short 'd'
-          -                <> long "db-file"
-          -                <> metavar "DB_FILE"
-          -                <> value sqliteFile
-          -                <> help (  "The filename for the SQLite file. (default = "
-          -                        ++ encodeString sqliteFile ++ ")"))
-          -}
     where xmlDir     = "../gk-texts"
-          -- sqliteFile = "inverse-index.sqlite"

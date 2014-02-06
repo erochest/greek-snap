@@ -18,7 +18,6 @@ cabal-version:       >=1.10
 executable index-xml
   main-is:             IndexXml.hs
   other-modules:       Utils
-                     -- , Db
   default-language:    Haskell2010
   build-depends:       base >=4.6 && <4.7
                      , unordered-containers
@@ -35,9 +34,6 @@ executable index-xml
                      , errors
                      , optparse-applicative
                      , text-icu
-                     -- , persistent
-                     -- , persistent-template
-                     -- , persistent-sqlite
 
 executable load-file
   main-is:             LoadFile.hs
