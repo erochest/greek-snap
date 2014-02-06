@@ -109,7 +109,9 @@ main = do
     undefined
 
 data IndexXml = IX
-              { xmlDir     :: FilePath
+              { xmlDir       :: FilePath
+              , contextLines :: Int
+              , queryTerm    :: T.Text
               -- , sqliteFile :: FilePath
               } deriving (Show)
 
@@ -123,6 +125,14 @@ indexXmlOpts = info (helper <*> indexXml)
 indexXml :: Parser IndexXml
 indexXml =   IX
          <$> xmlDirOption xmlDir
+         <*> option (  short 'c'
+                    <> long "context"
+                    <> metavar "CONTEXT_LINES"
+                    <> value 2
+                    <> help "The number of context lines before and after\
+                            \ each hit. (default = 2)")
+        <*> argument (Just . T.pack)
+                     (metavar "QUERY" <> help "The query to search for.")
          {-
           - <*> fileOption (  short 'd'
           -                <> long "db-file"
@@ -132,4 +142,4 @@ indexXml =   IX
           -                        ++ encodeString sqliteFile ++ ")"))
           -}
     where xmlDir     = "../gk-texts"
-          sqliteFile = "inverse-index.sqlite"
+          -- sqliteFile = "inverse-index.sqlite"
