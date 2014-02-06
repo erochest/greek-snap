@@ -3,6 +3,14 @@
 {-# LANGUAGE TupleSections     #-}
 {-# OPTIONS_GHC -Wall #-}
 
+-- TODOS:
+-- [ ] list hit locations, grouped by files and ordered by line
+-- [ ] list hit contexts, grouped by files and ordered by line
+-- [ ] combine hit contexts
+-- [ ] get contexts from files and print them
+-- [ ] highlighting
+-- [ ] highlighting options
+
 
 module Main where
 
