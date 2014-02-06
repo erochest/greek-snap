@@ -30,8 +30,6 @@ import           Data.Monoid
 import qualified Data.Text                 as T
 import           Data.Text.ICU
 import qualified Data.Text.IO              as TIO
-import qualified Data.Text.Lazy            as TL
-import qualified Data.Text.Lazy.Builder    as TB
 import           Data.XML.Types
 import           Filesystem
 import           Filesystem.Path.CurrentOS hiding (filename)
@@ -49,13 +47,25 @@ import           Debug.Trace
 type FileLocation  = (FilePath, PositionRange)
 type InvertedIndex = M.HashMap T.Text (D.DList FileLocation)
 
-data HitContext = HitContext
-                { _contextLocation :: FileLocation
-                , _contextTerm     :: T.Text
+data HitContext = HC
+                { _contextLocation :: PositionRange
                 , _contextCount    :: Int
+                , _contextRange    :: (Int, Int)
                 , _contextLines    :: [T.Text]
                 } deriving (Show)
 makeLenses ''HitContext
+
+data FileContext = FC
+                 { _contextFile :: FilePath
+                 , _fileHits :: [HitContext]
+                 } deriving (Show)
+makeLenses ''FileContext
+
+data QueryContext = QC
+                  { _queryTerm :: T.Text
+                  , _queryFiles :: [FileContext]
+                  } deriving (Show)
+makeLenses ''QueryContext
 
 
 grc :: LocaleName
@@ -107,72 +117,85 @@ offsetWord :: (Maybe PositionRange, Break Word) -> (PositionRange, T.Text)
 offsetWord (mpos, break) = (offset break pos, brkBreak break)
     where pos = fromMaybe (PositionRange (Position 0 0) (Position 0 0)) mpos
 
+lookupQuery :: T.Text -> InvertedIndex -> [FileLocation]
+lookupQuery query = join . maybeToList . fmap D.toList . M.lookup query
+
 indexTokens :: FilePath -> InvertedIndex -> (PositionRange, T.Text)
             -> InvertedIndex
 indexTokens filename iindex (pos, token) =
     M.insertWith mappend token (D.singleton (filename, pos)) iindex
 
-hitContext :: T.Text -> Int -> FileLocation -> [T.Text] -> HitContext
-hitContext term context fileLoc =
-    HitContext fileLoc term context . extractLines (snd fileLoc) context
+hitContext :: Int -> [T.Text] -> PositionRange -> HitContext
+hitContext context lines prange =
+    uncurry (HC prange context) $ extractLines prange context lines
 
-extractLines :: PositionRange -> Int -> [a] -> [a]
+fileContext :: Int -> [FileLocation] -> IO (Maybe FileContext)
+fileContext _ [] = return Nothing
+fileContext context ps@((fp, _):_) = do
+    lines <- T.lines <$> TIO.readFile (encodeString fp)
+    return . Just . FC fp $ map (hitContext context lines . snd) ps
+
+queryContext :: T.Text -> Int -> InvertedIndex -> IO QueryContext
+queryContext query context iindex =
+    fmap (QC query . catMaybes)
+        . mapM (fileContext context)
+        . L.groupBy onFirsts
+        . L.sort
+        $ lookupQuery query iindex
+
+extractLines :: PositionRange -> Int -> [a] -> ((Int, Int), [a])
 extractLines (PositionRange start end) context =
-    L.take lineRange . L.drop startLine
+    ((startLine, endLine),) . L.take lineRange . L.drop (startLine - 1)
     where startLine = posLine start - context
           endLine   = posLine end   + context
-          lineRange = max 1 $ endLine - startLine
+          lineRange = 1 + endLine - startLine
 
-formatContext :: HitContext -> T.Text
-formatContext HitContext{..} = TL.toStrict . TB.toLazyText . mconcat $
-    [ TB.fromText _contextTerm
-    , colon
-    , TB.fromString (encodeString filepath)
-    , colon
-    , TB.fromString (show prange)
-    , nl
-    ]
-    ++ map ((<> nl) . TB.fromText) _contextLines
-    where (filepath, prange) = _contextLocation
-          nl    = TB.singleton '\n'
-          colon = TB.singleton ':'
+nl :: T.Text
+nl = "\n"
+
+underscore' :: Char -> T.Text -> T.Text
+underscore' c t = T.replicate (T.length t) $ T.singleton c
+
+formatQuery :: QueryContext -> [T.Text]
+formatQuery QC{..} =  [ _queryTerm, nl
+                      , underscore' '=' _queryTerm, nl, nl
+                      ]
+                   ++ concatMap formatFile _queryFiles
+
+formatFile :: FileContext -> [T.Text]
+formatFile FC{..} =  [ contextFile', nl
+                     , underscore' '-' contextFile', nl, nl
+                     ]
+                  ++ concatMap formatHit _fileHits
+    where contextFile' = T.pack $ encodeString _contextFile
+
+formatHit :: HitContext -> [T.Text]
+formatHit HC{..} =  [ tshow _contextLocation, nl
+                    , tshow $ fst _contextRange, " - "
+                    , tshow $ snd _contextRange, nl
+                    ]
+                 ++ [ "||| " <> l <> nl | l <- _contextLines
+                    ]
+                 ++ [nl]
+
+tshow :: Show a => a -> T.Text
+tshow = T.pack . show
 
 onFirsts :: Eq a => (a, b) -> (a, c) -> Bool
 onFirsts = curry (uncurry (==) . (fst *** fst))
 
-putnl :: IO ()
-putnl = putStrLn ""
-
-underscore :: Char -> T.Text -> IO ()
-underscore c t =  TIO.putStrLn t
-               >> TIO.putStrLn (T.replicate (T.length t) $ T.singleton c)
-               >> putnl
-
-printFileGroup :: Int -> T.Text -> [FileLocation] -> IO ()
-printFileGroup context query hits@((filepath, _):_) = do
-    lines <- T.lines <$> TIO.readFile (encodeString filepath)
-    underscore '-' . T.pack $ encodeString filepath
-    mapM_ (TIO.putStrLn . formatContext . flip (hitContext query context) lines)
-          hits
-
-printFileGroup _     _       []          = return ()
-
 main :: IO ()
 main = do
     IX{..} <- execParser indexXmlOpts
-    underscore '=' queryTerm
-    mapM_ (printFileGroup contextN queryTerm)
-        . L.groupBy onFirsts
-        . L.sort
-        . maybe [] D.toList
-        . M.lookup queryTerm
+    mapM_ TIO.putStr . formatQuery
+        =<< queryContext queryText contextN
         =<< foldM indexFile M.empty
         =<< listDirectory xmlDir
 
 data IndexXml = IX
               { xmlDir    :: FilePath
               , contextN  :: Int
-              , queryTerm :: T.Text
+              , queryText :: T.Text
               } deriving (Show)
 
 indexXmlOpts :: ParserInfo IndexXml
