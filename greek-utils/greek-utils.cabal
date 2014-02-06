@@ -15,9 +15,33 @@ build-type:          Simple
 -- extra-source-files:  
 cabal-version:       >=1.10
 
+executable index-xml
+  main-is:             IndexXml.hs
+  other-modules:       Utils
+                     -- , Db
+  default-language:    Haskell2010
+  build-depends:       base >=4.6 && <4.7
+                     , unordered-containers
+                     , xml-lens
+                     , lens
+                     , conduit
+                     , xml-conduit
+                     , xml-types
+                     , dlist
+                     , attoparsec-conduit
+                     , system-filepath
+                     , system-fileio
+                     , text
+                     , errors
+                     , optparse-applicative
+                     , text-icu
+                     -- , persistent
+                     -- , persistent-template
+                     -- , persistent-sqlite
+
 executable load-file
   main-is:             LoadFile.hs
-  -- other-modules:       
+  other-modules:       Utils
   -- other-extensions:    
   build-depends:       base >=4.6 && <4.7
                      , yesod

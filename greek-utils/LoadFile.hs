@@ -35,10 +35,8 @@ import           Text.XML.Lens               hiding (Document)
 import           Yesod
 import qualified Yesod.Default.Config        as C
 
+import           Utils
 
-hole = undefined
-
-data Hole = Hole
 
 -- You can define all of your database entities in the entities file.
 -- You can find more information on persistent and how to declare entities
@@ -96,15 +94,7 @@ data LoadFile = LF
 
 loadFileConfig :: Parser LoadFile
 loadFileConfig =   LF
-               <$> fileOption (  long "xml-dir"
-                              <> short 'x'
-                              <> metavar "XML_DIR"
-                              <> value defXmlDir
-                              <> help (  "The directory containing the XML\
-                                         \ files to process and load. (Default = '"
-                                      <> encodeString defXmlDir <> "'.)"
-                                      )
-                              )
+               <$> xmlDirOption defXmlDir
                <*> fileOption (  long "psql-config"
                               <> short 'p'
                               <> metavar "PSQL_CONFIG_FILE"
@@ -121,6 +111,4 @@ loadFileConfig =   LF
     where defXmlDir     = "./gk-texts/"
           defPsqlConfig = "./dialoguer/config/postgresql.yml"
 
-fileOption :: Mod OptionFields FilePath -> Parser FilePath
-fileOption fields = nullOption (reader (pure . decodeString) <> fields)
 
