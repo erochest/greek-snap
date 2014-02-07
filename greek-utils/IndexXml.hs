@@ -6,7 +6,6 @@
 {-# OPTIONS_GHC -Wall #-}
 
 -- TODOS:
--- [ ] combine hit contexts
 -- [ ] highlighting
 -- [ ] highlighting options
 
@@ -28,6 +27,7 @@ import qualified Data.HashMap.Strict       as M
 import qualified Data.List                 as L
 import           Data.Maybe
 import           Data.Monoid
+import           Data.Ord
 import qualified Data.Text                 as T
 import           Data.Text.ICU
 import qualified Data.Text.IO              as TIO
@@ -52,8 +52,12 @@ data Hit
 data File
 data Query
 
+data Couple a = C0
+              | C1 a
+              | C2 a a
+
 data ResultContext a where
-    HC :: { _contextLocation :: PositionRange
+    HC :: { _contextLocation :: D.DList PositionRange
           , _contextCount    :: Int
           , _contextRange    :: (Int, Int)
           , _contextLines    :: [T.Text]
@@ -64,7 +68,30 @@ data ResultContext a where
     QC :: { _queryTerm  :: T.Text
           , _queryFiles :: [ResultContext File]
           }                                -> ResultContext Query
-makeLenses ''ResultContext
+
+contextLocation :: Lens' (ResultContext Hit) (D.DList PositionRange)
+contextLocation = lens _contextLocation $ \hc l -> hc { _contextLocation = l }
+
+contextRange :: Lens' (ResultContext Hit) (Int, Int)
+contextRange = lens _contextRange $ \hc r -> hc { _contextRange = r }
+
+contextStartLine :: Lens' (ResultContext Hit) Int
+contextStartLine = contextRange . _1
+
+contextEndLine :: Lens' (ResultContext Hit) Int
+contextEndLine = contextRange . _2
+
+prangeStart :: Lens' PositionRange Position
+prangeStart = lens posRangeStart $ \prange s -> prange { posRangeStart = s }
+
+prangeEnd :: Lens' PositionRange Position
+prangeEnd = lens posRangeEnd $ \prange s -> prange { posRangeEnd = s }
+
+pline :: Lens' Position Int
+pline = lens posLine $ \pos l -> pos { posLine = l }
+
+pcol :: Lens' Position Int
+pcol = lens posCol $ \pos c -> pos { posCol = c }
 
 data BuilderInfo a where
     HB :: { hitContext  :: Int
@@ -137,8 +164,9 @@ indexTokens filename iindex (pos, token) =
     M.insertWith mappend token (D.singleton (filename, pos)) iindex
 
 mkContext :: BuilderInfo a -> IO (Maybe (ResultContext a))
-mkContext HB{..} = return . Just . uncurry (HC hitPRange hitContext) $
+mkContext HB{..} = return . Just . uncurry (HC rangeSeq hitContext) $
     extractLines hitPRange hitContext hitLines
+    where rangeSeq = D.singleton hitPRange
 
 mkContext (FB _ []) = return Nothing
 mkContext (FB fcontext flocs@((fp, _):_)) = do
@@ -158,6 +186,63 @@ extractLines (PositionRange start end) context =
           endLine   = posLine end   + context
           lineRange = 1 + endLine - startLine
 
+mergeLines :: Int -> [T.Text] -> Int -> [T.Text] -> [T.Text]
+mergeLines astart alines bstart blines =
+    map snd
+        . M.toList
+        . M.fromList
+        . L.sortBy (comparing fst)
+        $ zip [astart..] alines ++ zip [bstart..] blines
+
+combineChildren :: ResultContext a -> ResultContext a
+combineChildren a@(HC _ _ _ _)  = a
+combineChildren a@(FC _ fhits)  = a { _fileHits   = combineAll fhits }
+combineChildren a@(QC _ qfiles) = a { _queryFiles = combineAll qfiles }
+
+combine :: ResultContext a -> ResultContext a -> Couple (ResultContext a)
+combine a@(HC _ _ _ _) b@(HC _ _ _ _)
+    | astart > bstart = combine b a
+    | aend   < bstart = C2 a b
+    | otherwise = C1 $ HC ((a ^. contextLocation) <> (b ^. contextLocation))
+                          (lend ^. pline - astart)
+                          (astart, max aend bend)
+                          (mergeLines astart (_contextLines a)
+                                      bstart (_contextLines b))
+    where lend = D.foldr max (Position 0 0)
+               . D.map posRangeEnd
+               $ (a ^. contextLocation) <> (b ^. contextLocation)
+          (astart, aend) = _contextRange a
+          (bstart, bend) = _contextRange b
+
+combine a@(FC afile _) b@(FC bfile _)
+    | afile == bfile = walkCombine a b (fst . _contextRange) _fileHits (FC afile)
+    | otherwise = C2 (combineChildren a) (combineChildren b)
+
+combine a@(QC aterm _) b@(QC bterm _)
+    | aterm == bterm = walkCombine a b _contextFile _queryFiles (QC aterm)
+    | otherwise = C2 (combineChildren a) (combineChildren b)
+
+combine _ _ = C0
+
+walkCombine :: Ord b
+            => ResultContext a -> ResultContext a
+            -> (ResultContext c -> b)
+            -> (ResultContext a -> [ResultContext c])
+            -> ([ResultContext c] -> ResultContext a)
+            -> Couple (ResultContext a)
+walkCombine a b sortable childs make =
+    C1 . make . combineAll . L.sortBy (comparing sortable)
+        $ (childs a) ++ (childs b)
+
+combineAll :: [ResultContext a] -> [ResultContext a]
+combineAll []  = []
+combineAll [a] = [a]
+combineAll (a:b:xs) =
+    case combine a b of
+        C0     -> combineAll xs
+        C1 c   -> combineAll (c : xs)
+        C2 c d -> c : combineAll (d : xs)
+
 nl :: T.Text
 nl = "\n"
 
@@ -176,9 +261,12 @@ formatContext FC{..} =  [ contextFile', nl
                      ++ concatMap formatContext _fileHits
     where contextFile' = T.pack $ encodeString _contextFile
 
-formatContext HC{..} =  [ tshow _contextLocation, nl
+formatContext HC{..} =  L.intersperse "," (map tshow $ D.toList _contextLocation)
+                     ++ [ nl
                         , tshow $ fst _contextRange, " - "
-                        , tshow $ snd _contextRange, nl
+                        , tshow $ snd _contextRange, " : "
+                        , tshow $ (snd _contextRange) - (fst _contextRange)
+                        , nl
                         ]
                      ++ [ "||| " <> l <> nl | l <- _contextLines
                         ]
@@ -193,7 +281,10 @@ onFirsts = curry (uncurry (==) . (fst *** fst))
 main :: IO ()
 main = do
     IX{..} <- execParser indexXmlOpts
-    mapM_ TIO.putStr . formatContext . fromMaybe (QC queryText [])
+    mapM_ TIO.putStr
+        .   formatContext
+        .   combineChildren
+        .   fromMaybe (QC queryText [])
         =<< mkContext . QB queryText contextN
         =<< foldM indexFile M.empty
         =<< listDirectory xmlDir
