@@ -69,9 +69,9 @@ formatContext HC{..} =  L.intersperse "," (map tshow $ D.toList _contextLocation
 
 highlight :: Int -> [T.Text] -> [PositionRange] -> [T.Text]
 highlight startLine lines = highlight' startLine lines
-                          . L.sortBy (comparing fst)
                           . mapMaybe (addKey key)
                           . L.groupBy (onEq key)
+                          . L.sortBy (comparing key)
     where key = posLine . posRangeStart
           addKey _ []       = Nothing
           addKey f xs@(x:_) = Just (f x, xs)
