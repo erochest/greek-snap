@@ -5,7 +5,7 @@
 {-# OPTIONS_GHC -Wall #-}
 
 -- TODOS:
--- [ ] highlighting
+-- [ ] normalize case before indexing
 -- [ ] highlighting options
 
 

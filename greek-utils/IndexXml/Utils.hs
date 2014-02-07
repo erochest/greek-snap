@@ -1,11 +1,14 @@
 module IndexXml.Utils
     ( onFirsts
+    , onEq
     ) where
 
 
 import           Control.Arrow
 
 
-onFirsts :: Eq a => (a, b) -> (a, c) -> Bool
-onFirsts = curry (uncurry (==) . (fst *** fst))
+onEq :: Eq b => (a -> b) -> a -> a -> Bool
+onEq f = curry (uncurry (==) . (f *** f))
 
+onFirsts :: Eq a => (a, b) -> (a, b) -> Bool
+onFirsts = onEq fst
