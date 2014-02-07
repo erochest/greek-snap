@@ -3,17 +3,8 @@
 
 
 module IndexXml.Index
-    ( grc
-    , indexFile
-    , isContentEvent
-    , getText
-    , tokenizeText
-    , spread
-    , offset
-    , offsetPair
-    , offsetWord
+    ( indexFile
     , lookupQuery
-    , indexTokens
     ) where
 
 

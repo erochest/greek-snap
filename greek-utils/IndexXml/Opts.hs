@@ -3,7 +3,6 @@
 
 module IndexXml.Opts
     ( indexXmlOpts
-    , indexXml
     ) where
 
 

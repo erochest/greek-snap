@@ -1,12 +1,6 @@
 module IndexXml.Lens
     ( contextLocation
-    , contextRange
-    , contextStartLine
-    , contextEndLine
-    , prangeStart
-    , prangeEnd
     , pline
-    , pcol
     ) where
 
 

@@ -36,7 +36,7 @@ main = do
         .   formatContext
         .   combineChildren
         .   fromMaybe (QC queryText [])
-        =<< mkContext . QB queryText contextN
+        =<< makeContext queryText contextN
         =<< foldM indexFile M.empty
         =<< listDirectory xmlDir
 

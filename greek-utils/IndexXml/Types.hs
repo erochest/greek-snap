@@ -7,9 +7,7 @@ module IndexXml.Types
     , Hit
     , File
     , Query
-    , Couple(..)
     , ResultContext(..)
-    , BuilderInfo(..)
     , IndexXml(..)
     ) where
 
@@ -29,10 +27,6 @@ data Hit
 data File
 data Query
 
-data Couple a = C0
-              | C1 a
-              | C2 a a
-
 data ResultContext a where
     HC :: { _contextLocation :: D.DList PositionRange
           , _contextCount    :: Int
@@ -45,19 +39,6 @@ data ResultContext a where
     QC :: { _queryTerm  :: T.Text
           , _queryFiles :: [ResultContext File]
           }                                -> ResultContext Query
-
-data BuilderInfo a where
-    HB :: { hitContext  :: Int
-          , hitLines    :: [T.Text]
-          , hitPRange   :: PositionRange
-          }                             -> BuilderInfo Hit
-    FB :: { fileContext :: Int
-          , fileLocs    :: [FileLocation]
-          }                             -> BuilderInfo File
-    QB :: { qText       :: T.Text
-          , qContext    :: Int
-          , qIndex      :: InvertedIndex
-          }                             -> BuilderInfo Query
 
 data IndexXml = IX
               { xmlDir    :: FilePath

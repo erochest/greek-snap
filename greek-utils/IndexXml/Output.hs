@@ -4,10 +4,7 @@
 
 
 module IndexXml.Output
-    ( nl
-    , underscore'
-    , formatContext
-    , tshow
+    ( formatContext
     ) where
 
 

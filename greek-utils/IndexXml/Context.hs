@@ -5,13 +5,8 @@
 
 
 module IndexXml.Context
-    ( mkContext
-    , extractLines
-    , mergeLines
+    ( makeContext
     , combineChildren
-    , combine
-    , walkCombine
-    , combineAll
     ) where
 
 
@@ -33,6 +28,26 @@ import           IndexXml.Lens
 import           IndexXml.Types
 import           IndexXml.Utils
 
+
+data Couple a = C0
+              | C1 a
+              | C2 a a
+
+data BuilderInfo a where
+    HB :: { hitContext  :: Int
+          , hitLines    :: [T.Text]
+          , hitPRange   :: PositionRange
+          }                             -> BuilderInfo Hit
+    FB :: { fileContext :: Int
+          , fileLocs    :: [FileLocation]
+          }                             -> BuilderInfo File
+    QB :: { qText       :: T.Text
+          , qContext    :: Int
+          , qIndex      :: InvertedIndex
+          }                             -> BuilderInfo Query
+
+makeContext :: T.Text -> Int -> InvertedIndex -> IO (Maybe (ResultContext Query))
+makeContext term context iindex = mkContext $ QB term context iindex
 
 mkContext :: BuilderInfo a -> IO (Maybe (ResultContext a))
 mkContext HB{..} = return . Just . uncurry (HC rangeSeq hitContext) $
