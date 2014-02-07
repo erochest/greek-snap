@@ -8,16 +8,18 @@ module IndexXml.Output
     ) where
 
 
-import           Data.Conduit.Attoparsec   (Position (..), PositionRange (..))
-import qualified Data.DList                as D
-import qualified Data.List                 as L
+import           Data.Char
+import           Data.Conduit.Attoparsec    (Position (..), PositionRange (..))
+import qualified Data.DList                 as D
+import qualified Data.List                  as L
 import           Data.Maybe
 import           Data.Monoid
 import           Data.Ord
-import qualified Data.Text                 as T
-import qualified Data.Text.Lazy            as TL
+import qualified Data.Text                  as T
+import qualified Data.Text.Lazy             as TL
 import           Data.Text.Lazy.Builder
-import           Filesystem.Path.CurrentOS hiding (fromText)
+import           Data.Text.Lazy.Builder.Int
+import           Filesystem.Path.CurrentOS  hiding (fromText)
 
 import           IndexXml.Types
 import           IndexXml.Utils
@@ -44,7 +46,8 @@ underscore' c t = T.replicate (T.length t) $ T.singleton c
 
 formatContext :: ResultContext a -> [T.Text]
 formatContext QC{..} =  [ _queryTerm, nl
-                        , underscore' '=' _queryTerm, nl, nl
+                        , underscore' '=' _queryTerm, nl
+                        , codes _queryTerm, nl, nl
                         ]
                      ++ concatMap formatContext _queryFiles
 
@@ -98,4 +101,13 @@ highlightLine line = TL.toStrict
 
 tshow :: Show a => a -> T.Text
 tshow = T.pack . show
+
+codes :: T.Text -> T.Text
+codes  = TL.toStrict
+       . toLazyText
+       . foldr mappend mempty
+       . L.intersperse (singleton ' ')
+       . map (mappend "U+" . hexadecimal)
+       . map ord
+       . T.unpack
 
