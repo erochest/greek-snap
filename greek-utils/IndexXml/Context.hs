@@ -66,12 +66,12 @@ mergeLines astart alines bstart blines =
         $ zip [astart..] alines ++ zip [bstart..] blines
 
 combineChildren :: ResultContext a -> ResultContext a
-combineChildren a@(HC _ _ _ _)  = a
+combineChildren a@HC{}          = a
 combineChildren a@(FC _ fhits)  = a { _fileHits   = combineAll fhits }
 combineChildren a@(QC _ qfiles) = a { _queryFiles = combineAll qfiles }
 
 combine :: ResultContext a -> ResultContext a -> Couple (ResultContext a)
-combine a@(HC _ _ _ _) b@(HC _ _ _ _)
+combine a@HC{} b@HC{}
     | astart > bstart = combine b a
     | aend   < bstart = C2 a b
     | otherwise = C1 $ HC ((a ^. contextLocation) <> (b ^. contextLocation))
@@ -103,7 +103,7 @@ walkCombine :: Ord b
             -> Couple (ResultContext a)
 walkCombine a b sortable childs make =
     C1 . make . combineAll . L.sortBy (comparing sortable)
-        $ (childs a) ++ (childs b)
+        $ childs a ++ childs b
 
 combineAll :: [ResultContext a] -> [ResultContext a]
 combineAll []  = []

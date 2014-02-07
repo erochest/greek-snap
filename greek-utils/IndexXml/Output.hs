@@ -42,7 +42,7 @@ formatContext HC{..} =  L.intersperse "," (map tshow $ D.toList _contextLocation
                      ++ [ nl
                         , tshow $ fst _contextRange, " - "
                         , tshow $ snd _contextRange, " : "
-                        , tshow $ (snd _contextRange) - (fst _contextRange)
+                        , tshow $ snd _contextRange - fst _contextRange
                         , nl
                         ]
                      ++ [ "||| " <> l <> nl | l <- _contextLines
