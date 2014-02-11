@@ -40,10 +40,9 @@ items :: Int -> a -> Int
 items = flip (const succ)
 
 stopList :: [T.Text] -> [(T.Text, Double)]
-stopList = -- uncurry ratioize
-         -- . fmap (sortBy (flip (comparing snd)) . M.toList)
-         -- . foldl' (foldPair items inc) (0, M.empty)
-           map (,0.0)
+stopList = uncurry ratioize
+         . fmap (sortBy (flip (comparing snd)) . M.toList)
+         . foldl' (foldPair items inc) (0, M.empty)
          . concatMap tokenize
     where ratioize total xs = let total' = double total
                               in  map (fmap ((/ total') . double)) xs
