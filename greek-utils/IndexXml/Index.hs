@@ -5,6 +5,7 @@
 module IndexXml.Index
     ( indexFile
     , lookupQuery
+    , tokenizeText
     ) where
 
 
@@ -15,6 +16,7 @@ import           Data.Conduit
 import           Data.Conduit.Attoparsec   (Position (..), PositionRange (..))
 import qualified Data.Conduit.Binary       as CB
 import qualified Data.Conduit.List         as CL
+import qualified Data.Conduit.Text         as CT
 import qualified Data.DList                as D
 import qualified Data.HashMap.Strict       as M
 import           Data.Maybe
@@ -36,7 +38,8 @@ grc = Locale "grc"
 indexFile :: InvertedIndex -> FilePath -> IO InvertedIndex
 indexFile iindex xmlFile = runResourceT $
        CB.sourceFile (FS.encodeString xmlFile)
-    $= parseBytesPos def
+    $= CT.decode CT.utf8
+    $= parseText def
     $= CL.filter (isContentEvent . snd)
     $= CL.filter (isJust . fst)
     $= CL.map (fmap getText)
