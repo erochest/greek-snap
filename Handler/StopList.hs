@@ -109,8 +109,8 @@ maybeapp mf = fromMaybe id mf
 
 getStopList :: StopListSpec -> Handler [(T.Text, Double)]
 getStopList StopList{..} = do
-    docs  <- map (documentContent . entityVal) <$> runDB (selectList [] [])
-    texts <- liftIO $ mapM getText docs
+    texts <-  mapM (liftIO . getText . documentContent . entityVal)
+          =<< runDB (selectList [] [])
     return . maybeapp (fmap dropWhile . fmap (flip ((>) . snd)) $ stopListP)
            . maybeapp (take <$> stopListN)
            $ stopList texts

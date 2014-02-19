@@ -1,5 +1,6 @@
+{-# LANGUAGE BangPatterns      #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE TupleSections     #-}
 
 
 module Text.Greek.Tokenize
@@ -51,5 +52,8 @@ double :: Int -> Double
 double = fromRational . fromIntegral
 
 foldPair :: (a -> c -> a) -> (b -> c -> b) -> (a, b) -> c -> (a, b)
-foldPair f g (a, b) c = (f a c, g b c)
+foldPair f g (a, b) c =
+    let !f' = f a c
+        !g' = g b c
+    in  (f', g')
 

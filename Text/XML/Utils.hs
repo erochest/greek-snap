@@ -7,7 +7,6 @@ module Text.XML.Utils
     ) where
 
 
-import           Control.Applicative
 import           Data.Conduit
 import qualified Data.Conduit.List     as CL
 import qualified Data.DList            as D
@@ -25,7 +24,7 @@ foldEvents f a xml = runResourceT $ CL.sourceList [xml]
     $$ CL.fold f a
 
 getText :: T.Text -> IO T.Text
-getText xml = T.concat . D.toList <$> foldEvents go D.empty xml
+getText xml = fmap (T.concat . D.toList) $! foldEvents go D.empty xml
     where go dl (EventContent (ContentText t))   = dl `D.snoc` t
           go dl (EventContent (ContentEntity t)) = dl `D.snoc` ("&" <> t <> ";")
           go dl (EventCDATA t)                   = dl `D.snoc` t
