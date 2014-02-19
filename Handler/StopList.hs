@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TupleSections     #-}
+{-# LANGUAGE BangPatterns      #-}
 
 
 module Handler.StopList where
@@ -111,9 +112,9 @@ getStopList :: StopListSpec -> Handler [(T.Text, Double)]
 getStopList StopList{..} = do
     texts <-  mapM (liftIO . getText . documentContent . entityVal)
           =<< runDB (selectList [] [])
-    return . maybeapp (fmap dropWhile . fmap (flip ((>) . snd)) $ stopListP)
-           . maybeapp (take <$> stopListN)
-           $ stopList texts
+    let !stops = stopList texts
+    return $! maybeapp (fmap dropWhile . fmap (flip ((>) . snd)) $ stopListP)
+           $! maybeapp (take <$> stopListN) stops
 
 stopListAForm :: AForm Handler StopListSpec
 stopListAForm =   StopList
