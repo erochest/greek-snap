@@ -7,6 +7,9 @@ module Text.Greek.Tokenize
     ( grc
     , tokenize
     , frequencies
+    , stopListRaw
+    , stopListMerge
+    , stopListRatios
     , stopList
     ) where
 
@@ -40,14 +43,23 @@ inc m t = M.insertWith (+) t 1 m
 items :: Int -> a -> Int
 items = flip (const succ)
 
-stopList :: [T.Text] -> [(T.Text, Double)]
-stopList = uncurry ratioize
-         . fmap (sortBy descSnd . M.toList)
-         . foldl' (foldPair items inc) (0, M.empty)
-         . concatMap tokenize
-    where ratioize total xs = let total' = double total
-                              in  map (fmap ((/ total') . double)) xs
+stopListRaw :: T.Text -> (Int, M.HashMap T.Text Int)
+stopListRaw = foldl' (foldPair items inc) (0, M.empty) . tokenize
+
+stopListMerge :: (Eq a, Hashable a)
+              => [(Int, M.HashMap a Int)] -> (Int, M.HashMap a Int)
+stopListMerge = foldl' (step (+) (M.unionWith (+))) (0, M.empty)
+    where step f g (a, b) (c, d) = (f a c, g b d)
+
+stopListRatios :: (Int, M.HashMap T.Text Int) -> [(T.Text, Double)]
+stopListRatios (total, index) = sortBy descSnd
+                              . M.toList
+                              $ M.map ((/ total') . double) index
+    where total'  = double total
           descSnd = flip (comparing snd)
+
+stopList :: [T.Text] -> [(T.Text, Double)]
+stopList = stopListRatios . stopListMerge . map stopListRaw
 
 double :: Int -> Double
 double = fromRational . fromIntegral
