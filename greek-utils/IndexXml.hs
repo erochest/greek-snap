@@ -17,6 +17,7 @@ import qualified Data.HashMap.Strict       as M
 import           Data.Maybe
 import qualified Data.Text.IO              as TIO
 import           Filesystem
+import           Filesystem.Path.CurrentOS
 import           Options.Applicative
 import           Prelude                   hiding (FilePath, break, lines)
 
@@ -36,7 +37,7 @@ main = do
         .   formatContext
         .   combineChildren
         .   fromMaybe (QC queryText [])
-        =<< makeContext queryText contextN
+        =<< makeContext (TIO.readFile . encodeString) queryText contextN
         =<< foldM indexFile M.empty
         =<< listDirectory xmlDir
 

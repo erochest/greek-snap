@@ -15,6 +15,37 @@ build-type:          Simple
 -- extra-source-files:  
 cabal-version:       >=1.10
 
+executable index-db
+  main-is:             IndexDb.hs
+  other-modules:       Utils
+                     , IndexXml.Context
+                     , IndexXml.Index
+                     , IndexXml.Lens
+                     , IndexXml.Opts
+                     , IndexXml.Output
+                     , IndexXml.Types
+                     , IndexXml.Utils
+  default-language:    Haskell2010
+  build-depends:       base >=4.6 && <4.7
+                     , attoparsec-conduit
+                     , conduit
+                     , dlist
+                     , errors
+                     , lens
+                     , monad-logger
+                     , optparse-applicative
+                     , persistent
+                     , persistent-postgresql
+                     , system-fileio
+                     , system-filepath
+                     , text
+                     , text-icu
+                     , unordered-containers
+                     , xml-conduit
+                     , xml-lens
+                     , xml-types
+                     , yesod
+
 executable count-tokens
   main-is:             CountTokens.hs
   other-modules:       Utils

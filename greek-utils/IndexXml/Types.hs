@@ -4,6 +4,7 @@
 module IndexXml.Types
     ( FileLocation
     , InvertedIndex
+    , ContentGetter
     , Hit
     , File
     , Query
@@ -22,6 +23,8 @@ import           Prelude                   hiding (FilePath)
 
 type FileLocation  = (FilePath, PositionRange)
 type InvertedIndex = M.HashMap T.Text (D.DList FileLocation)
+
+type ContentGetter = FilePath -> IO T.Text
 
 data Hit
 data File

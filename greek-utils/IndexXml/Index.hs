@@ -1,9 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes        #-}
 {-# LANGUAGE TupleSections     #-}
 
 
 module IndexXml.Index
     ( indexFile
+    , indexDocument
+    , indexConsumer
     , lookupQuery
     , tokenizeText
     ) where
@@ -39,13 +42,21 @@ indexFile :: InvertedIndex -> FilePath -> IO InvertedIndex
 indexFile iindex xmlFile = runResourceT $
        CB.sourceFile (FS.encodeString xmlFile)
     $= CT.decode CT.utf8
-    $= parseText def
-    $= CL.filter (isContentEvent . snd)
-    $= CL.filter (isJust . fst)
-    $= CL.map (fmap getText)
-    $= CL.concatMap (spread tokenizeText)
-    $= CL.map offsetWord
-    $$ CL.fold (indexTokens xmlFile) iindex
+    $$ indexConsumer iindex xmlFile
+
+indexDocument :: InvertedIndex -> (T.Text, T.Text) -> IO InvertedIndex
+indexDocument iindex (sourceFile, content) = runResourceT $
+       CL.sourceList [content] $$ indexConsumer iindex (FS.fromText sourceFile)
+
+indexConsumer :: (Monad m, MonadThrow m) => InvertedIndex -> FilePath -> Sink T.Text m InvertedIndex
+indexConsumer iindex xmlFile =
+       parseText def
+    =$ CL.filter (isContentEvent . snd)
+    =$ CL.filter (isJust . fst)
+    =$ CL.map (fmap getText)
+    =$ CL.concatMap (spread tokenizeText)
+    =$ CL.map offsetWord
+    =$ CL.fold (indexTokens xmlFile) iindex
 
 isContentEvent :: Event -> Bool
 isContentEvent (EventContent _) = True

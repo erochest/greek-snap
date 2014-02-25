@@ -46,24 +46,26 @@ data BuilderInfo a where
           , qIndex      :: InvertedIndex
           }                             -> BuilderInfo Query
 
-makeContext :: T.Text -> Int -> InvertedIndex -> IO (Maybe (ResultContext Query))
-makeContext term context iindex = mkContext $ QB term context iindex
+makeContext :: ContentGetter -> T.Text -> Int -> InvertedIndex -> IO (Maybe (ResultContext Query))
+makeContext getter term context iindex = mkContext getter $ QB term context iindex
 
-mkContext :: BuilderInfo a -> IO (Maybe (ResultContext a))
-mkContext HB{..} = return . Just . uncurry (HC rangeSeq hitContext) $
+mkContext :: ContentGetter -> BuilderInfo a -> IO (Maybe (ResultContext a))
+mkContext getter HB{..} = return . Just . uncurry (HC rangeSeq hitContext) $
     extractLines hitPRange hitContext hitLines
     where rangeSeq = D.singleton hitPRange
 
-mkContext (FB _ []) = return Nothing
-mkContext (FB fcontext flocs@((fp, _):_)) = do
-    lines <- T.lines <$> TIO.readFile (encodeString fp)
-    Just . FC fp . catMaybes <$> mapM (mkContext . HB fcontext lines . snd) flocs
+mkContext _ (FB _ []) = return Nothing
+mkContext getter (FB fcontext flocs@((fp, _):_)) = do
+    lines <- T.lines <$> getter fp
+    Just . FC fp . catMaybes <$>
+            mapM (mkContext getter . HB fcontext lines . snd) flocs
 
-mkContext QB{..} = fmap (Just . QC qText . catMaybes)
-                 . mapM (mkContext . FB qContext)
-                 . L.groupBy onFirsts
-                 . L.sort
-                 $ lookupQuery qText qIndex
+mkContext getter QB{..} =
+      fmap (Just . QC qText . catMaybes)
+    . mapM (mkContext getter . FB qContext)
+    . L.groupBy onFirsts
+    . L.sort
+    $ lookupQuery qText qIndex
 
 extractLines :: PositionRange -> Int -> [a] -> ((Int, Int), [a])
 extractLines (PositionRange start end) context =

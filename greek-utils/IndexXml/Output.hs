@@ -57,7 +57,7 @@ formatContext FC{..} =  [ contextFile', nl
                      ++ concatMap formatContext _fileHits
     where contextFile' = T.pack $ encodeString _contextFile
 
-formatContext HC{..} =  L.intersperse "," (map tshow $ D.toList _contextLocation)
+formatContext HC{..} =  L.intersperse ", " (map tshow $ D.toList _contextLocation)
                      ++ [ nl
                         , tshow $ fst _contextRange, " - "
                         , tshow $ snd _contextRange, " : "
