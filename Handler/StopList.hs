@@ -113,10 +113,10 @@ getStopList StopList{..} = do
     docs   <- runDB (selectList [] [])
     !stops <- liftIO
            $  mapM (getText . documentContent . entityVal) docs
-    return $! maybeapp (fmap dropWhile . fmap (flip ((>) . snd)) $ stopListP)
-           $! maybeapp (take <$> stopListN)
-           $! stopListRatios
-           $! stopListMerge
+    return .  maybeapp (fmap dropWhile . fmap (flip ((>) . snd)) $ stopListP)
+           .  maybeapp (take <$> stopListN)
+           .  stopListRatios
+           .  stopListMerge
            $  map stopListRaw stops
 
 stopListAForm :: AForm Handler StopListSpec
