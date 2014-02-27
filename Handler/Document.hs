@@ -42,12 +42,6 @@ getDocumentDownloadR documentId = do
 getDocumentTokensR :: DocumentId -> Handler RepPlain
 getDocumentTokensR documentId = do
     content <- documentContent <$> runDB (get404 documentId)
-    liftIO $! (repPlain . (<> "\n") . T.intercalate "\n" . concatMap tokenize . T.lines) <$> getText content
-    {-
-     - liftIO $! fmap joinTokens $! getText content
-     - where joinTokens input =  repPlain
-     -                        $! (<> "\n")
-     -                        $! T.intercalate "\n"
-     -                        $! tokenize input
-     -}
+    liftIO $! dumpTokens <$> getText content
+    where dumpTokens = repPlain . (<> "\n") . T.intercalate "\n" . tokenize
 

@@ -29,12 +29,12 @@ grc :: LocaleName
 grc = Locale "grc"
 
 tokenize :: T.Text -> [T.Text]
-tokenize input =
-    let !tokens = filter (not . T.all isSpace)
-                . map brkBreak
-                . filter ((/= Uncategorized) . brkStatus)
-                $ breaks (breakWord grc) input
-    in  tokens
+tokenize input = let !tokens = concatMap tokenizeLine $ T.lines input
+                 in  tokens
+    where tokenizeLine = filter (not . T.all isSpace)
+                       . map brkBreak
+                       . filter ((/= Uncategorized) . brkStatus)
+                       . breaks (breakWord grc)
 
 frequencies :: (Eq a, Hashable a) => [a] -> M.HashMap a Int
 frequencies = foldl' inc M.empty
