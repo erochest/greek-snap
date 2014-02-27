@@ -40,9 +40,9 @@ getDocumentDownloadR documentId = do
            $ encodeUtf8 documentContent
 
 getDocumentTokensR :: DocumentId -> Handler RepPlain
-getDocumentTokensR documentId =
-        documentContent <$> runDB (get404 documentId)
-    >>= liftIO . fmap joinTokens . getText
+getDocumentTokensR documentId = do
+    content <- documentContent <$> runDB (get404 documentId)
+    liftIO $! fmap joinTokens $! getText content
     where joinTokens input =  repPlain
                            $! (<> "\n")
                            $! T.intercalate "\n"
