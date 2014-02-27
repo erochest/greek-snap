@@ -1,5 +1,5 @@
 name:              greek-snap
-version:           0.2.16
+version:           0.2.17
 cabal-version:     >= 1.8
 build-type:        Simple
 
