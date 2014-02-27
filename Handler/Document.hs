@@ -42,5 +42,9 @@ getDocumentDownloadR documentId = do
 getDocumentTokensR :: DocumentId -> Handler RepPlain
 getDocumentTokensR documentId =
         documentContent <$> runDB (get404 documentId)
-    >>= liftIO . fmap (repPlain . (<> "\n") . T.intercalate "\n" . tokenize) . getText
+    >>= liftIO . fmap joinTokens . getText
+    where joinTokens input =  repPlain
+                           $! (<> "\n")
+                           $! T.intercalate "\n"
+                           $! tokenize input
 
