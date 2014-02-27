@@ -29,7 +29,8 @@ grc :: LocaleName
 grc = Locale "grc"
 
 tokenize :: T.Text -> [T.Text]
-tokenize input = let !tokens = concatMap tokenizeLine $ T.lines input
+tokenize input = let !tokens = map T.toLower . concatMap tokenizeLine
+                             $ T.lines input
                  in  tokens
     where tokenizeLine = filter (not . T.all isSpace)
                        . map brkBreak
