@@ -1,20 +1,22 @@
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE FlexibleContexts   #-}
-{-# LANGUAGE GADTs              #-}
-{-# LANGUAGE OverloadedStrings  #-}
-{-# LANGUAGE RecordWildCards    #-}
-{-# LANGUAGE TemplateHaskell    #-}
-{-# LANGUAGE TypeFamilies       #-}
+{-# LANGUAGE DeriveDataTypeable         #-}
+{-# LANGUAGE FlexibleContexts           #-}
+{-# LANGUAGE GADTs                      #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses      #-}
+{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE RecordWildCards            #-}
+{-# LANGUAGE TemplateHaskell            #-}
+{-# LANGUAGE TypeFamilies               #-}
 
 
 module Main where
 
 
-import qualified Data.List as L
+import           Conduit
 import           Control.Monad
 import           Control.Monad.Logger
-import           Data.Conduit
 import qualified Data.HashMap.Strict         as M
+import qualified Data.List                   as L
 import           Data.Maybe
 import           Data.Text                   (Text)
 import qualified Data.Text                   as T
@@ -39,7 +41,7 @@ import           IndexXml.Types
 import           Utils
 
 
-share [mkPersist sqlOnlySettings, mkMigrate "migrateAll"]
+share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "../config/models")
 
 
@@ -90,13 +92,13 @@ indexDbConfig =   ID
                              <> help (  "The YAML file containing the Postgres configuration.\
                                         \ (Default = '"
                                      <> encodeString defPsqlConfig <> "'.)"))
-              <*> option (  short 'c'
-                         <> long "context"
-                         <> metavar "CONTEXT_LINES"
-                         <> value 2
-                         <> help "The number of context lines before and after\
-                                 \ each hit. (default = 2)")
-             <*> O.argument (Just . T.pack)
+              <*> option auto (  short 'c'
+                              <> long "context"
+                              <> metavar "CONTEXT_LINES"
+                              <> value 2
+                              <> help "The number of context lines before\
+                                      \ and after each hit. (default = 2)")
+             <*> O.argument (T.pack <$> str)
                             (metavar "QUERY" <> help "The query to search for.")
     where defPsqlConfig = "../config/postgresql.yml"
 

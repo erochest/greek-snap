@@ -14,10 +14,10 @@ hole = undefined
 data Hole = Hole
 
 fileOption :: Mod OptionFields FilePath -> Parser FilePath
-fileOption fields = nullOption (reader (pure . decodeString) <> fields)
+fileOption = option (decodeString <$> str)
 
 textOption :: Mod OptionFields Text -> Parser Text
-textOption fields = nullOption (reader (pure . pack) <> fields)
+textOption = option (pack <$> str)
 
 xmlDirOption :: FilePath -> Parser FilePath
 xmlDirOption def =

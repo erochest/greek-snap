@@ -24,12 +24,12 @@ indexXmlOpts = info (helper <*> indexXml)
 indexXml :: Parser IndexXml
 indexXml =   IX
          <$> xmlDirOption xmlDir
-         <*> option (  short 'c'
-                    <> long "context"
-                    <> metavar "CONTEXT_LINES"
-                    <> value 2
-                    <> help "The number of context lines before and after\
-                            \ each hit. (default = 2)")
-        <*> O.argument (Just . T.pack)
+         <*> option auto (  short 'c'
+                         <> long "context"
+                         <> metavar "CONTEXT_LINES"
+                         <> value 2
+                         <> help "The number of context lines before and after\
+                                 \ each hit. (default = 2)")
+        <*> O.argument (T.pack <$> str)
                        (metavar "QUERY" <> help "The query to search for.")
     where xmlDir     = "../gk-texts"

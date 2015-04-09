@@ -7,7 +7,7 @@ module Text.XML.Utils
     ) where
 
 
-import           Data.Conduit
+import           Conduit
 import qualified Data.Conduit.List     as CL
 import qualified Data.DList            as D
 import           Data.Monoid

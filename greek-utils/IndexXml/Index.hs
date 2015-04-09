@@ -12,10 +12,10 @@ module IndexXml.Index
     ) where
 
 
+import           Conduit
 import           Control.Arrow
 import           Control.Monad
 import qualified Data.Char                 as C
-import           Data.Conduit
 import           Data.Conduit.Attoparsec   (Position (..), PositionRange (..))
 import qualified Data.Conduit.Binary       as CB
 import qualified Data.Conduit.List         as CL
@@ -29,7 +29,7 @@ import           Data.Text.ICU
 import           Data.XML.Types
 import           Filesystem.Path.CurrentOS
 import qualified Filesystem.Path.CurrentOS as FS
-import           Prelude                   hiding (FilePath)
+import           Prelude                   hiding (FilePath, Word)
 import           Text.XML.Stream.Parse
 
 import           IndexXml.Types

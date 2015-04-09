@@ -27,8 +27,6 @@ import           IndexXml.Opts
 import           IndexXml.Output
 import           IndexXml.Types
 
-import           Debug.Trace
-
 
 main :: IO ()
 main = do
